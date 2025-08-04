@@ -1,0 +1,6 @@
+- Getting Started
+  - [Overview](README.md)
+- Architecture Layers
+  - [DLL Integration](dll.md)
+  - [Tooling & Scripts](tooling.md)
+  - [GameMaker Bindings](gamemaker.md)
