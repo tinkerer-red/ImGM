@@ -42,14 +42,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>..\gm\ImGM\extensions\ImGM\</OutDir>
-    <IntDir>..\..\..\..\tmp\$(ShortProjectName)\$(Platform)\$(Configuration)\Debug\</IntDir>
+    <IntDir>..\..\..\..\temp\$(ShortProjectName)\$(Platform)\$(Configuration)\Debug\</IntDir>
     <TargetName>ImGM</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>..\gm\ImGM\extensions\ImGM\</OutDir>
-    <IntDir>..\..\..\..\tmp\$(ShortProjectName)\$(Platform)\$(Configuration)\Release\</IntDir>
+    <IntDir>..\..\..\..\temp\$(ShortProjectName)\$(Platform)\$(Configuration)\Release\</IntDir>
     <TargetName>ImGM</TargetName>
     <TargetExt>.dll</TargetExt>
   </PropertyGroup>

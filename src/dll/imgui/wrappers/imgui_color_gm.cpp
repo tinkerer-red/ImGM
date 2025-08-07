@@ -6,7 +6,7 @@
 GMFUNC(__imgui_color_edit3) {
 	const char* label = YYGetString(arg, 0);
 	double col = YYGetReal(arg, 1);
-	ImGuiColorEditFlags flags = YYGetInt64(arg, 2);
+	ImGuiColorEditFlags flags = static_cast<ImGuiColorEditFlags>(YYGetInt64(arg, 2));
 	GMDEFAULT(ImGuiColorEditFlags.None);
 	GMOVERRIDE(ColorEdit3);
 
@@ -18,7 +18,7 @@ GMFUNC(__imgui_color_edit3) {
 GMFUNC(__imgui_color_picker3) {
 	const char* label = YYGetString(arg, 0);
 	double col = YYGetReal(arg, 1);
-	ImGuiColorEditFlags flags = YYGetInt64(arg, 2);
+	ImGuiColorEditFlags flags = static_cast<ImGuiColorEditFlags>(YYGetInt64(arg, 2));
 	GMDEFAULT(ImGuiColorEditFlags.None);
 	GMOVERRIDE(ColorPicker3);
 
@@ -31,7 +31,7 @@ GMFUNC(__imgui_color_edit4) {
 	const char* label = YYGetString(arg, 0);
 	RValue* col = &arg[1];
 	GMHINT(ImColor);
-	ImGuiColorEditFlags flags = YYGetInt64(arg, 2);
+	ImGuiColorEditFlags flags = static_cast<ImGuiColorEditFlags>(YYGetInt64(arg, 2));
 	GMDEFAULT(ImGuiColorEditFlags.None);
 	GMOVERRIDE(ColorEdit4);
 
@@ -44,7 +44,7 @@ GMFUNC(__imgui_color_edit4) {
 	RValue* g = YYStructGetMember(col, "g");
 	RValue* b = YYStructGetMember(col, "b");
 	RValue* a = YYStructGetMember(col, "a");
-	ImVec4 color = ImVec4((float)(r->val / 0xFF), (float)(g->val / 0xFF), (float)(b->val / 0xFF), a->val);
+	ImVec4 color = ImVec4(static_cast<float>(r->val) / 0xFF, static_cast<float>(g->val) / 0xFF, static_cast<float>(b->val) / 0xFF, static_cast<float>(a->val));
 
 	Result.kind = VALUE_BOOL;
 	Result.val = false;
@@ -61,7 +61,7 @@ GMFUNC(__imgui_color_picker4) {
 	const char* label = YYGetString(arg, 0);
 	RValue* col = &arg[1];
 	GMHINT(ImColor);
-	ImGuiColorEditFlags flags = YYGetInt64(arg, 2);
+	ImGuiColorEditFlags flags = static_cast<ImGuiColorEditFlags>(YYGetInt64(arg, 2));
 	GMDEFAULT(ImGuiColorEditFlags.None);
 	GMOVERRIDE(ColorPicker4);
 
@@ -74,7 +74,7 @@ GMFUNC(__imgui_color_picker4) {
 	RValue* g = YYStructGetMember(col, "g");
 	RValue* b = YYStructGetMember(col, "b");
 	RValue* a = YYStructGetMember(col, "a");
-	ImVec4 color = ImVec4((float)(r->val / 0xFF), (float)(g->val / 0xFF), (float)(b->val / 0xFF), a->val);
+	ImVec4 color = ImVec4(static_cast<float>(r->val) / 0xFF, static_cast<float>(g->val) / 0xFF, static_cast<float>(b->val) / 0xFF, static_cast<float>(a->val));
 
 	Result.kind = VALUE_BOOL;
 	Result.val = false;
@@ -90,21 +90,21 @@ GMFUNC(__imgui_color_picker4) {
 GMFUNC(__imgui_color_button) {
 	const char* desc_id = YYGetString(arg, 0);
 	double color = YYGetReal(arg, 1);
-	float alpha = YYGetReal(arg, 2);
+	float alpha = static_cast<float>(YYGetReal(arg, 2));
 	GMDEFAULT(1);
-	ImGuiColorEditFlags flags = YYGetInt64(arg, 3);
+	ImGuiColorEditFlags flags = static_cast<ImGuiColorEditFlags>(YYGetInt64(arg, 3));
 	GMDEFAULT(ImGuiColorEditFlags.None);
-	double width = YYGetReal(arg, 4);
+	float width = static_cast<float>(YYGetReal(arg, 4));
 	GMDEFAULT(0);
-	double height = YYGetReal(arg, 5);
+	float height = static_cast<float>(YYGetReal(arg, 5));
 	GMDEFAULT(0);
 
 	Result.kind = VALUE_BOOL;
-	Result.val = ImGui::ColorButton(desc_id, GMCOLOR_TO(color, alpha), flags, ImVec2(width, height));
+	Result.val = ImGui::ColorButton(desc_id, GMCOLOR_TO(static_cast<int>(color), alpha), flags, ImVec2(width, height));
 }
 
 GMFUNC(__imgui_set_color_edit_options) {
-	ImGuiColorEditFlags flags = YYGetInt64(arg, 0);
+	ImGuiColorEditFlags flags = static_cast<ImGuiColorEditFlags>(YYGetInt64(arg, 0));
 	GMDEFAULT(ImGuiColorEditFlags.None);
 
 	ImGui::SetColorEditOptions(flags);

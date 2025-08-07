@@ -18,7 +18,7 @@
   "files":[
     {"$GMExtensionFile":"","%Name":"","constants":[
         {"$GMExtensionConstant":"","%Name":"IMGUI_GM_VERSION","hidden":false,"name":"IMGUI_GM_VERSION","resourceType":"GMExtensionConstant","resourceVersion":"2.0","value":"\"1.0.18\"",},
-      ],"copyToTargets":-1,"filename":"imgui_gm.dll","final":"","functions":[
+      ],"copyToTargets":-1,"filename":"imgm.dll","final":"","functions":[
         {"$GMExtensionFunction":"","%Name":"__imgui_initialize","argCount":0,"args":[],"documentation":"/// @function __imgui_initialize(info)\r\n/// @argument {ds_map} info - Operating system info","externalName":"__imgui_initialize","help":"","hidden":false,"kind":1,"name":"__imgui_initialize","resourceType":"GMExtensionFunction","resourceVersion":"2.0","returnType":1,},
         {"$GMExtensionFunction":"","%Name":"__imgui_update_state_from_struct","argCount":0,"args":[],"documentation":"","externalName":"__imgui_update_state_from_struct","help":"","hidden":false,"kind":1,"name":"__imgui_update_state_from_struct","resourceType":"GMExtensionFunction","resourceVersion":"2.0","returnType":1,},
         {"$GMExtensionFunction":"","%Name":"__imgui_new_frame","argCount":0,"args":[],"documentation":"","externalName":"__imgui_new_frame","help":"","hidden":false,"kind":1,"name":"__imgui_new_frame","resourceType":"GMExtensionFunction","resourceVersion":"2.0","returnType":1,},

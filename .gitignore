@@ -17,7 +17,9 @@ imgm.config.js
 node_modules/
 venv/
 env/
-
+src/dll/build/
+CMake/
+CMakeCache.txt
 *.so
 *.dll
 *.dylib

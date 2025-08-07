@@ -1,4 +1,5 @@
-#include <charconv>
+#pragma warning(disable: 4244)
+
 #include <string>
 #include <tchar.h>
 #include <imgui_gm.h>

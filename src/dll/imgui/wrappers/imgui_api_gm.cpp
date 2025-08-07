@@ -151,7 +151,7 @@ GMFUNC(__imgui_push_id) {
 		ImGui::PushID(id->GetString());
 		return;
 	}
-	ImGui::PushID(id->val);
+	ImGui::PushID(static_cast<int>(id->val));
 }
 
 GMFUNC(__imgui_pop_id) {
@@ -167,7 +167,7 @@ GMFUNC(__imgui_get_id) {
 }
 
 GMFUNC(__imgui_push_item_flag) {
-	ImGuiItemFlags item_flag = YYGetInt64(arg, 0);
+	ImGuiItemFlags item_flag = static_cast<ImGuiItemFlags>(YYGetInt64(arg, 0));
 	GMHINT(ImGuiItemFlags)
 	bool enabled = YYGetBool(arg, 1);
 
@@ -196,7 +196,7 @@ GMFUNC(__imgui_end_disabled) {
 }
 
 GMFUNC(__imgui_is_item_hovered) {
-	ImGuiHoveredFlags flags = YYGetReal(arg, 0);
+	ImGuiHoveredFlags flags = static_cast<ImGuiHoveredFlags>(YYGetReal(arg, 0));
 	GMDEFAULT(ImGuiHoveredFlags.None);
 
 	Result.kind = VALUE_BOOL;
@@ -214,7 +214,7 @@ GMFUNC(__imgui_is_item_focused) {
 }
 
 GMFUNC(__imgui_is_item_clicked) {
-	ImGuiMouseButton mouse_button = YYGetReal(arg, 0);
+	ImGuiMouseButton mouse_button = static_cast<ImGuiMouseButton>(YYGetReal(arg, 0));
 	GMDEFAULT(ImGuiMouseButton.Left);
 
 	Result.kind = VALUE_BOOL;
@@ -330,10 +330,10 @@ GMFUNC(__imgui_set_item_tooltip) {
 }
 
 GMFUNC(__imgui_is_rect_visible) {
-	double x1 = YYGetReal(arg, 0);
-	double y1 = YYGetReal(arg, 1);
-	double x2 = YYGetReal(arg, 2);
-	double y2 = YYGetReal(arg, 3);
+	float x1 = static_cast<float>(YYGetReal(arg, 0));
+	float y1 = static_cast<float>(YYGetReal(arg, 1));
+	float x2 = static_cast<float>(YYGetReal(arg, 2));
+	float y2 = static_cast<float>(YYGetReal(arg, 3));
 
 	Result.kind = VALUE_BOOL;
 	Result.val = ImGui::IsRectVisible(ImVec2(x1, y1), ImVec2(x2, y2));
@@ -386,7 +386,7 @@ GMFUNC(__imgui_pop_allow_keyboard_focus) {
 }
 
 GMFUNC(__imgui_set_keyboard_focus_here) {
-	double offset = YYGetReal(arg, 0);
+	int offset = static_cast<int>(YYGetReal(arg, 0));
 	GMDEFAULT(0);
 
 	ImGui::SetKeyboardFocusHere(offset);
@@ -499,7 +499,7 @@ GMFUNC(__imgui_clear_ini_settings) {
 
 GMFUNC(__imgui_config_flags_set) {
 	GMOVERRIDE(ConfigFlagsSet);
-	ImGuiConfigFlags flags = YYGetInt64(arg, 0);
+	ImGuiConfigFlags flags = static_cast<ImGuiConfigFlags>(YYGetInt64(arg, 0));
 
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags = flags;
@@ -507,7 +507,7 @@ GMFUNC(__imgui_config_flags_set) {
 
 GMFUNC(__imgui_config_flag_toggle) {
 	GMOVERRIDE(ConfigFlagToggle);
-	ImGuiConfigFlags flag = YYGetInt64(arg, 0);
+	ImGuiConfigFlags flag = static_cast<ImGuiConfigFlags>(YYGetInt64(arg, 0));
 
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags ^= flag;
@@ -539,7 +539,7 @@ GMFUNC(__imgui_log_text) {
 }
 
 GMFUNC(__imgui_log_to_clipboard) {
-	int auto_open_depth = YYGetReal(arg, 0);
+	int auto_open_depth = static_cast<int>(YYGetReal(arg, 0));
 	GMDEFAULT(-1);
 
 	ImGui::LogToClipboard(auto_open_depth);
@@ -548,7 +548,7 @@ GMFUNC(__imgui_log_to_clipboard) {
 
 GMFUNC(__imgui_log_to_tty) {
 	GMOVERRIDE(LogToTTY)
-	int auto_open_depth = YYGetReal(arg, 0);
+	int auto_open_depth = static_cast<int>(YYGetReal(arg, 0));
 	GMDEFAULT(-1);
 
 	ImGui::LogToTTY(auto_open_depth);
@@ -566,7 +566,7 @@ GMFUNC(__imgui_log_buttons) {
 }
 
 GMFUNC(__imgui_log_to_file) {
-	int auto_open_depth = YYGetReal(arg, 0);
+	int auto_open_depth = static_cast<int>(YYGetReal(arg, 0));
 	GMDEFAULT(-1);
 	RValue* filename = &arg[1];
 	GMDEFAULT(undefined);

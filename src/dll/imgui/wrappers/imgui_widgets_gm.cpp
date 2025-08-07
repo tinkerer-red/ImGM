@@ -6,9 +6,9 @@
 
 GMFUNC(__imgui_button) {
 	const char* label = YYGetString(arg, 0);
-	double width = YYGetReal(arg, 1);
+	float width = YYGetReal(arg, 1);
 	GMDEFAULT(0);
-	double height = YYGetReal(arg, 2);
+	float height = YYGetReal(arg, 2);
 	GMDEFAULT(0);
 
 	Result.kind = VALUE_BOOL;
@@ -57,7 +57,7 @@ GMFUNC(__imgui_image) {
 	double* uv = YYGetArray<double>(arg, 6, 8);
 	GMHIDDEN();
 	GMPASSTHROUGH(sprite_get_uvs(#arg0, #arg1));
-	GMPREPEND("if (!(ImGui.__ExtFlags & ImGuiExtFlags.RENDERER_GM)) texture_set_stage(0, sprite_get_texture(#arg0, #arg1)); ");
+	GMPREPEND("if (!(ImGui.__GFlags & ImGuiGFlags.RENDERER_GM)) texture_set_stage(0, sprite_get_texture(#arg0, #arg1)); ");
 
 	ImGui::ImageWithBg((ImTextureID)GetTexture(sprite, subimg, TextureType_Sprite), ImVec2(width * uv[6], height * uv[7]), ImVec2(uv[0], uv[1]), ImVec2(uv[2], uv[3]), GMCOLOR_TO(0, 0.0), GMCOLOR_TO(color, alpha));
 	Result.kind = VALUE_UNDEFINED;
@@ -79,7 +79,7 @@ GMFUNC(__imgui_image_button) {
 	double* uv = YYGetArray<double>(arg, 9, 8);
 	GMHIDDEN();
 	GMPASSTHROUGH(sprite_get_uvs(#arg1, #arg2));
-	GMPREPEND("if (!(ImGui.__ExtFlags & ImGuiExtFlags.RENDERER_GM)) texture_set_stage(0, sprite_get_texture(#arg1, #arg2)); ");
+	GMPREPEND("if (!(ImGui.__GFlags & ImGuiGFlags.RENDERER_GM)) texture_set_stage(0, sprite_get_texture(#arg1, #arg2)); ");
 
 	Result.kind = VALUE_BOOL;
 	Result.val = ImGui::ImageButton(str_id, (ImTextureID)GetTexture(sprite, subimg, TextureType_Sprite), ImVec2(width * uv[6], height * uv[7]), ImVec2(uv[0], uv[1]), ImVec2(uv[2], uv[3]), GMCOLOR_TO(bg_color, bg_alpha), GMCOLOR_TO(color, alpha));
@@ -98,7 +98,7 @@ GMFUNC(__imgui_surface) {
 	GMDEFAULT(surface_get_height(#arg0));
 	double* uv = YYGetArray<double>(arg, 5, 8);
 	GMHIDDEN();
-	GMPREPEND("var _tex = surface_get_texture(#arg0); if (!(ImGui.__ExtFlags & ImGuiExtFlags.RENDERER_GM)) {texture_set_stage(0, _tex);};");
+	GMPREPEND("var _tex = surface_get_texture(#arg0); if (!(ImGui.__GFlags & ImGuiGFlags.RENDERER_GM)) {texture_set_stage(0, _tex);};");
 	GMPASSTHROUGH(texture_get_uvs(_tex));
 	GMOVERRIDE(Surface);
 

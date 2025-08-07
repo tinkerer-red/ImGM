@@ -99,7 +99,7 @@ project(projectName)
 	}
 	processImext(dllDir .. "imext")
 	vpaths(_vpaths)
-	objdir("../../tmp/$(ShortProjectName)/$(Platform)/$(Configuration)/")
+	objdir("../../temp/$(ShortProjectName)/$(Platform)/$(Configuration)/")
 
 	filter "configurations:Debug"
 		defines { "DEBUG" }
