@@ -122,3 +122,20 @@ export function ansiSlice(string, start, end) {
 	}
 	return result
 }
+
+/**
+ *
+ * @param {String} input
+ * @returns {String}
+ */
+export function stripLineCommentPrefix(input) {
+	let x = input
+		.split("\n")
+		.map((line) =>
+			line.trimStart().startsWith("//")
+				? line.replace(/^\/\/\s*/, "")
+				: line
+		)
+		.join("\n")
+	return x
+}

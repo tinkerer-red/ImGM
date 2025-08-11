@@ -27,16 +27,13 @@ const main = async () => {
 
 		// Generate API
 		const api = await getApi(parser.tokens, module, filePath)
-
 		const result = {}
 
 		result.time = (Date.now() - totalStartTime) / 1000
 		result.moduleHandle = module.handle
 		result.file = filePath
 		result.tokens = JSON.stringify(api.tokens)
-		result.enums = api.enums.filter((e) => {
-			return { name: e.name.to() }
-		})
+		result.enums = JSON.stringify(api.enums)
 		result.functions = JSON.stringify(api.functions)
 		result.artifacts =
 			api.artifacts.length > 0 ? JSON.stringify(api.artifacts) : undefined
@@ -46,7 +43,7 @@ const main = async () => {
 		parentPort.postMessage({
 			type: "result",
 			success: true,
-			result,
+			result: result,
 		})
 	} catch (error) {
 		parentPort.postMessage({

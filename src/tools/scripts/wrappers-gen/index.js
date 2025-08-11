@@ -10,7 +10,11 @@ import { fileURLToPath } from "url"
 import Name from "../../lib/class/name.js"
 import { getOrCreateModule } from "../../lib/modules.js"
 import { CppToken } from "../../lib/parsers/langs/cpp.js"
-import { ApiFunction, getWrappers } from "../../lib/parsers/wrappers.js"
+import {
+	ApiEnum,
+	ApiFunction,
+	getWrappers,
+} from "../../lib/parsers/wrappers.js"
 import { Program } from "../../lib/program.js"
 
 const __filename = fileURLToPath(import.meta.url)
@@ -118,8 +122,8 @@ async function main() {
 					col: t.col,
 					children: (t.children || []).map(createToken), // recursive
 				})
-				newTok.source = t.source
-				newTok._extra = t._extra
+				newTok.source ??= t.source
+				newTok._extra ??= t._extra
 				return newTok
 			}
 			apis.tokens = apis
@@ -134,27 +138,52 @@ async function main() {
 				})
 				.map(createToken)
 
-			let funcs = apis.flatMap((api) => JSON.parse(api.functions) || [])
-			apis.functions = funcs.map((f) => {
-				let func = new ApiFunction({
-					name: new Name(f.name._name, f.name._case, f.name._sep),
-					args: f.args,
-					returnType: f.returnType,
-					source: f.source,
-					sourceToken:
-						apis.tokens.find((t) => {
-							t.type == f.sourceToken.type &&
-								t.line == f.sourceToken.line &&
-								t.pos == f.sourceToken.pos
-						}) ?? f.sourceToken,
-					namespace: f.namespace,
-					comment: f.comment ?? "",
+			for (const api of apis) {
+				const rawEnums = JSON.parse(api.enums) || [];
+				api.enums = rawEnums.map((e) => {
+					const sourceToken =
+						apis.tokens.find(
+							(t) =>
+								t.type === e.sourceToken.type &&
+								t.line === e.sourceToken.line &&
+								t.pos === e.sourceToken.pos
+						) ?? e.sourceToken
+
+					let en = new ApiEnum({
+						name: new Name(e.name._name, e.name._case, e.name._sep),
+						entries: e.entries,
+						sourceToken,
+						source: e.source,
+						namespace: e.namespace,
+						comment: e.comment,
+						entriesComments: e.entriesComments,
+					})
+					return en
 				})
-				return func
-			})
+				const rawFuncs = JSON.parse(api.functions) || []
+				api.functions = rawFuncs.map((f) => {
+					const sourceToken =
+						apis.tokens.find(
+							(t) =>
+								t.type === f.sourceToken.type &&
+								t.line === f.sourceToken.line &&
+								t.pos === f.sourceToken.pos
+						) ?? f.sourceToken
+
+					return new ApiFunction({
+						name: new Name(f.name._name, f.name._case, f.name._sep),
+						args: f.args,
+						returnType: f.returnType,
+						source: f.source,
+						sourceToken,
+						namespace: f.namespace,
+						comment: f.comment ?? "",
+					})
+				})
+			}
 
 			// Analyze wrappers
-			let wrapperAnalyzer = getWrappers(apis.tokens, apis)
+			let wrapperAnalyzer = getWrappers(apis.tokens, undefined, apis)
 
 			const fullApi = {
 				tokens: apis.tokens,
@@ -163,8 +192,6 @@ async function main() {
 				wrappers: wrapperAnalyzer.wrappers,
 				artifacts: apis.flatMap((api) => api.artifacts || []),
 			}
-
-			console.log(fullApi.wrappers[0])
 
 			// TODO: Here we should update the .gml files directly to the gm/scripts/..... for namespaces (e.g. ImGui, and ImExtExtensionName)
 			// from the enums and wrappers above. with jsdocs (from config as a reference)

@@ -98,7 +98,7 @@ const parserConfig = {
 		tokenizerOptions: {
 			keepSemi: true,
 			addEOF: false,
-			addNewline: false,
+			addNewline: true,
 		},
 	},
 	jsdocfile: {

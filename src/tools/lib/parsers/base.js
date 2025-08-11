@@ -694,6 +694,7 @@ export class BaseParser {
 				throw error
 			}
 			Logger.error(`Error while parsing`, { error })
+			Logger.error(`${error}`)
 		}
 	}
 
@@ -1102,6 +1103,10 @@ export class BaseParser {
 		)
 		return Array.isArray(token) ? token2 : token2[0]
 	}
+
+	[util.inspect.custom]() {
+		return `{${Program.colors.get("blue", `'${this.constructor.name}'`)}}`
+	}
 }
 
 /**
@@ -1293,6 +1298,33 @@ export class Navigator {
 			replace: this.replace.bind(this),
 			clear: this.clear.bind(this),
 		}
+	}
+
+	/**
+	 * Match a sequence of tokens by type and/or value
+	 * @param {Array<string|[string, string]>} pattern - e.g. ["Identifier", ["Operator", "="]]
+	 * @param {number} offset
+	 * @returns {boolean}
+	 */
+	match(pattern, offset = 0) {
+		for (let i = 0; i < pattern.length; i++) {
+			const token = this.peek(offset + i)
+			if (!token) return false
+
+			const expected = pattern[i]
+
+			if (typeof expected === "string") {
+				if (token.type !== expected) return false
+			} else if (Array.isArray(expected)) {
+				const [expectedType, expectedValue] = expected
+				if (
+					token.type !== expectedType ||
+					token.value !== expectedValue
+				)
+					return false
+			}
+		}
+		return true
 	}
 }
 

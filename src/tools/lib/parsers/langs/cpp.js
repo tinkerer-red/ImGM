@@ -25,6 +25,7 @@ import {
  * @extends {Dict}
  */
 export class CppTokenType extends BaseTokenType {
+	static NEWLINE = "Newline"
 	/** ( */
 	static LPAREN = "ParenthesesLeft"
 	/** ) */
@@ -964,7 +965,7 @@ export class CppParser extends BaseParser {
 		let changes = {}
 		switch (token.type) {
 			case this.TokenType.IDENTIFIER:
-				let tok = this.peek()
+				let tok = this.peek(1)
 				if (tok) {
 					if (tok.type == this.TokenType.TEMPLATE_ARGS) {
 						changes.value = token.value + "|template=" + tok.value
