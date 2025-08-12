@@ -41,9 +41,13 @@ export class BaseFunctionArgument {
 		passthrough = undefined,
 		...extra
 	} = {}) {
+		this.oldName = name instanceof Name ? name._name : name
 		this.name = this.constructor.getName(
-			name instanceof Name ? name : new Name(name, "snake_case")
+			new Name(this.oldName, "snake_case", "")
 		)
+		if (this.name._name == this.oldName) {
+			this.oldName = undefined
+		}
 		this.type = type
 		this.isHidden = isHidden
 		this.passthrough = passthrough
@@ -87,7 +91,7 @@ export class BaseFunction {
 		source = undefined,
 		...extra
 	} = {}) {
-		this.name = name instanceof Name ? name : new Name(name)
+		this.name = name instanceof Name ? name : new Name(name, undefined, "")
 		this.args = args
 		this.returnType = returnType
 		this.sourceToken = sourceToken

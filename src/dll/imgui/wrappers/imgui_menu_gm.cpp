@@ -1,21 +1,21 @@
 #include "../imgui_gm.h"
 
-GMFUNC(__imgui_begin_menubar) {
+GMFUNC(__imgui_begin_menu_bar) {
 	Result.kind = VALUE_BOOL;
 	Result.val = ImGui::BeginMenuBar();
 }
 
-GMFUNC(__imgui_end_menubar) {
+GMFUNC(__imgui_end_menu_bar) {
 	ImGui::EndMenuBar();
 	Result.kind = VALUE_UNDEFINED;
 }
 
-GMFUNC(__imgui_begin_mainmenubar) {
+GMFUNC(__imgui_begin_main_menu_bar) {
 	Result.kind = VALUE_BOOL;
 	Result.val = ImGui::BeginMainMenuBar();
 }
 
-GMFUNC(__imgui_end_mainmenubar) {
+GMFUNC(__imgui_end_main_menu_bar) {
 	ImGui::EndMainMenuBar();
 	Result.kind = VALUE_UNDEFINED;
 }

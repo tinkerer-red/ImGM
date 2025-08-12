@@ -181,7 +181,10 @@ export class ApiAnalyzer extends BaseParser {
 					return
 				default:
 					Logger.warn(
-						`Could not understand ${type} for ${token.value}`
+						`Could not understand ${type} for ${token.value}`,
+						{
+							type: Logger.types.WRAPPER_TOKEN_UNKNOWN,
+						}
 					)
 					return
 			}
@@ -524,7 +527,7 @@ export async function getApi(tokens, module, source) {
 // #region Wrappers
 
 export class WrapperArgument extends BaseFunctionArgument {
-	reserved = reservedArgumentNames
+	static reserved = reservedArgumentNames
 }
 
 export class WrapperFunction extends BaseFunction {
@@ -534,14 +537,15 @@ export class WrapperFunction extends BaseFunction {
 		this.targetFunc = targetFunc
 		this.isWrapped = true
 		this.isUnsupported = false
-		this.nameOverride = undefined
+		this.oldName = undefined
 		this.argIndex = -1
 		this.isForceInline = false
 	}
 
-	setNameOverride(name, override = false) {
-		if (this.nameOverride != undefined) return
-		this.nameOverride = name
+	setName(name) {
+		if (this.oldName != undefined) return
+		this.oldName = name
+		this.name = name
 	}
 
 	addArg(name, ind, origin) {
@@ -552,6 +556,14 @@ export class WrapperFunction extends BaseFunction {
 			isHidden: false,
 			passthrough: undefined,
 		})
+		if (this.args[ind].oldName != undefined) {
+			Logger.warn(
+				`Changing arg${(ind+1)} name of ${this.name}: \"${this.args[ind].oldName}\" -> \"${this.args[ind].name._name}\"`,
+				{
+					type: Logger.types.WRAPPER_ARG_CHANGED,
+				}
+			)
+		}
 		this.argIndex = ind
 	}
 
@@ -575,7 +587,7 @@ export class WrapperFunction extends BaseFunction {
 					name?.type == TokenType.STRING_DQ ||
 					name?.type == TokenType.STRING_SQ
 				) {
-					this.setNameOverride(name.value, true)
+					this.setName(name.value)
 					return true
 				}
 			}
@@ -620,11 +632,15 @@ export class WrapperFunction extends BaseFunction {
 
 							default: {
 								this.returnType = token.getFlatString()
-								Logger.info(
+								Logger.warn(
 									"Overwriting return type for " +
 										this.name +
-										" as " +
-										this.returnType
+										": " +
+										this.returnType,
+									{
+										type: Logger.types
+											.WRAPPER_CONTEXT_CHANGED,
+									}
 								)
 								return true
 							}
@@ -642,11 +658,14 @@ export class WrapperFunction extends BaseFunction {
 				const next = bodyNavigator.peek(1)
 				const ret = next.children[0]
 				this.returnType = ret.getFlatString()
-				Logger.info(
+				Logger.warn(
 					"Overwriting return type for " +
 						this.name +
-						" as " +
-						this.returnType
+						": " +
+						this.returnType,
+					{
+						type: Logger.types.WRAPPER_CONTEXT_CHANGED,
+					}
 				)
 				return true
 			}
@@ -666,7 +685,10 @@ export class WrapperFunction extends BaseFunction {
 				return true
 		}
 		Logger.warn(
-			`Could not handle unknown modifier "${token.value}" for wrapper "${this.name}" at line ${token.line}`
+			`Could not handle unknown modifier "${token.value}" for wrapper "${this.name}" at line ${token.line}`,
+			{
+				type: Logger.types.WRAPPER_MODIFIER_UNKNOWN,
+			}
 		)
 		return false
 	}
@@ -1044,7 +1066,6 @@ export class WrapperAnalyzer extends BaseParser {
 							if (left.value === "Result")
 								wr.setToReturnArg(inner.value)
 							else {
-								console.log(wr)
 								wr.addArg(left.value, inner.value)
 							}
 							bodyNav.advance()
