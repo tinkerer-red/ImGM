@@ -7,6 +7,8 @@
  */
 import path from "path"
 import { fileURLToPath } from "url"
+import Config from "../../config.js"
+import File from "../../lib/class/file.js"
 import Name from "../../lib/class/name.js"
 import { getOrCreateModule } from "../../lib/modules.js"
 import { CppToken } from "../../lib/parsers/langs/cpp.js"
@@ -14,8 +16,10 @@ import {
 	ApiEnum,
 	ApiFunction,
 	getWrappers,
+	injectWrappers,
 } from "../../lib/parsers/wrappers.js"
 import { Program } from "../../lib/program.js"
+import { updateGmlScripts } from "./gml.js"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -139,7 +143,7 @@ async function main() {
 				.map(createToken)
 
 			for (const api of apis) {
-				const rawEnums = JSON.parse(api.enums) || [];
+				const rawEnums = JSON.parse(api.enums) || []
 				api.enums = rawEnums.map((e) => {
 					const sourceToken =
 						apis.tokens.find(
@@ -193,7 +197,12 @@ async function main() {
 				artifacts: apis.flatMap((api) => api.artifacts || []),
 			}
 
-			// TODO: Here we should update the .gml files directly to the gm/scripts/..... for namespaces (e.g. ImGui, and ImExtExtensionName)
+			let extFile = new File(
+				path.join(Config.gm.projectDir, "extensions/ImGM/ImGM.yy")
+			)
+			injectWrappers(fullApi.wrappers, extFile)
+
+			// TODO: Here we should update the .gml files in gm/scripts/..... for namespaces (e.g. ImGui, and ImExt<ExtensionName>)
 			// from the enums and wrappers above. with jsdocs (from config as a reference)
 
 			Logger.info(`${"─".repeat(10)} Total Stats ${"─".repeat(10)}`)

@@ -2670,7 +2670,7 @@ function ImGui() constructor {
     /// @context ImGui
     /// @return {Bool}
     static BeginMenuBar = function() {
-        return __imgui_begin_menubar();
+        return __imgui_begin_menu_bar();
     }
 
     /// @function EndMenuBar
@@ -2678,7 +2678,7 @@ function ImGui() constructor {
     /// @context ImGui
     /// @return {Undefined}
     static EndMenuBar = function() {
-        return __imgui_end_menubar();
+        return __imgui_end_menu_bar();
     }
 
     /// @function BeginMainMenuBar
@@ -2686,7 +2686,7 @@ function ImGui() constructor {
     /// @context ImGui
     /// @return {Bool}
     static BeginMainMenuBar = function() {
-        return __imgui_begin_mainmenubar();
+        return __imgui_begin_main_menu_bar();
     }
 
     /// @function EndMainMenuBar
@@ -2694,7 +2694,7 @@ function ImGui() constructor {
     /// @context ImGui
     /// @return {Undefined}
     static EndMainMenuBar = function() {
-        return __imgui_end_mainmenubar();
+        return __imgui_end_main_menu_bar();
     }
 
     /// @function BeginMenu

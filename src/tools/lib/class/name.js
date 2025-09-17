@@ -17,7 +17,7 @@ export default class Name {
 	 */
 	constructor(name, toStringCase = "PascalCase", toStringSep = " ") {
 		if (name instanceof Name) {
-			return name;
+			return name
 		}
 		this._name = name
 		this._case = toStringCase
@@ -108,7 +108,7 @@ export default class Name {
 	 */
 	get = function (caseName = undefined, sep = undefined) {
 		caseName ??= this._case
-		const f = `to${caseName}`
+		const f = `to${converters.toPascalCase(caseName, '')}`
 		if (typeof this[f] === "function") {
 			return this[f](sep)
 		}

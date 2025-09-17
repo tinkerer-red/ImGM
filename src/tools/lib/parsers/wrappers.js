@@ -4,11 +4,14 @@ import Config from "../../config.js"
 import { BaseFunction, BaseFunctionArgument } from "../class/base-functions.js"
 import ImGMError from "../class/error.js"
 import Name from "../class/name.js"
-import { convertYYGetTypeToDataType } from "../gm.js"
 import { getChildModules, Module } from "../modules.js"
 import { CppKeywords, TokenType } from "../parsers/langs/cpp.js"
 import { Program } from "../program.js"
-import { resolveTemplate, stripLineCommentPrefix } from "../utils/string.js"
+import {
+	removeTrailingCommas,
+	resolveTemplate,
+	stripLineCommentPrefix,
+} from "../utils/string.js"
 import { BaseParser } from "./base.js"
 
 const Logger = Program.Logger
@@ -540,6 +543,8 @@ export class WrapperFunction extends BaseFunction {
 		this.oldName = undefined
 		this.argIndex = -1
 		this.isForceInline = false
+		this._start = ""
+		this._end = ""
 	}
 
 	setName(name) {
@@ -558,7 +563,7 @@ export class WrapperFunction extends BaseFunction {
 		})
 		if (this.args[ind].oldName != undefined) {
 			Logger.warn(
-				`Changing arg${(ind+1)} name of ${this.name}: \"${this.args[ind].oldName}\" -> \"${this.args[ind].name._name}\"`,
+				`Changing arg${ind + 1} name of ${this.name}: \"${this.args[ind].oldName}\" -> \"${this.args[ind].name._name}\"`,
 				{
 					type: Logger.types.WRAPPER_ARG_CHANGED,
 				}
@@ -595,7 +600,7 @@ export class WrapperFunction extends BaseFunction {
 			case `${GMMOD}DEFAULT`: {
 				if (this.argIndex === -1)
 					throw `Could not handle ${token.value} modifier, target argument is unset at line ${token.line}`
-				const arg = this.Arguments[this.ArgumentIndex]
+				const arg = this.args[this.ArgumentIndex]
 				arg.Default = token.getFlatString()
 				return true
 			}
@@ -787,7 +792,7 @@ export class WrapperFunction extends BaseFunction {
 		const jsdocConfig = Config.jsdoc
 		const indent = Config.style.spacing.repeat(spacing)
 		const fnName = !snake ? this.Calls : this.Name.slice(2)
-		const visibleArgs = this.Arguments.filter((arg) => !arg.Hidden)
+		const visibleArgs = this.args.filter((arg) => !arg.Hidden)
 		let lines = []
 
 		// Description block
@@ -942,6 +947,64 @@ export class WrapperFunction extends BaseFunction {
 				"return ___ret;\n"
 		str += Config.style.spacing.repeat(spacing) + "}\n"
 		return str
+	}
+
+	finalize() {
+		if (!this.targetFunc) {
+			const calls = this.name.slice("__imgui_".length).split("_")
+			this.targetFunc = calls
+				.map((e) => e[0].toUpperCase() + e.slice(1))
+				.join("")
+			Logger.warning(
+				`Calling function is unset for wrapper "${this.name}", infering call as "${this.targetFunc}" from name`
+			)
+		}
+
+		if (this._start.length > 0) {
+			let start = this._start
+			this.args.forEach((e, ind) => {
+				start = start.replaceAll("#arg" + ind, e.Name)
+			})
+			this._start = start
+		}
+
+		if (this._end.length > 0) {
+			let end = this._end
+			this.args.forEach((e, ind) => {
+				end = end.replaceAll("#arg" + ind, e.Name)
+			})
+			this._end = end
+		}
+
+		for (let i = 0; i < this.args.length; i++) {
+			const arg = this.args[i]
+			if (!arg)
+				throw `Could not read undefined argument at index ${i} in ${this.Name} at line ${this.Line}`
+
+			if (WrapperArgument.reserved.includes(arg.Name)) {
+				Logger.warning(
+					`Reserved keyword "${arg.Name}" found in arguments for wrapper "${this.Name}", renaming to "_${arg.Name}"`
+				)
+				arg.Name = "_" + arg.Name
+			}
+
+			if (arg.Passthrough !== undefined) {
+				let passthrough = arg.Passthrough
+				this.args.forEach((e, ind) => {
+					passthrough = passthrough.replaceAll("#arg" + ind, e.Name)
+				})
+				arg.Passthrough = passthrough
+			}
+
+			if (arg.Default !== undefined) {
+				let def = arg.Default
+				this.args.forEach((e, ind) => {
+					def = def.replaceAll("#arg" + ind, e.Name)
+				})
+				arg.Default = def
+			}
+		}
+		return this
 	}
 
 	static _fixArgDefaultValue(val) {
@@ -1161,6 +1224,68 @@ export function getWrappers(tokens, source, apis) {
 	})
 	wrapperAnalyzer.main()
 	return wrapperAnalyzer
+}
+
+/**
+ * Injects wrapper functions into a GMExtension file if they don't already exist.
+ *
+ * @param {Array<WrapperFunction>} wrappers
+ * @param {File} extensionFile
+ */
+export function injectWrappers(wrappers, extensionFile) {
+	const extension = JSON.parse(removeTrailingCommas(extensionFile.content))
+	if (extension.resourceType !== "GMExtension") {
+		throw new ImGMError(
+			`Invalid extension file "${extensionFile.name}": expected resourceType "GMExtension"`
+		)
+	}
+
+	const dllName = "imgm.dll"
+	const index = extension.files.findIndex((f) => f.filename === dllName)
+	if (index === -1) {
+		throw new ImGMError(
+			`Missing DLL entry "${dllName}" in "${extensionFile.name}"`
+		)
+	}
+
+	const resource = extension.files[index]
+	const existing = resource.functions || []
+
+	const newFunctions = wrappers
+		.filter((w) => !existing.some((fn) => fn?.name === w.name))
+		.map((w) => w.toGMExtensionFunction())
+
+	const allFunctions = [...existing, ...newFunctions]
+
+	// remove functions for pretty serialization (temporary)
+	const extensionClone = structuredClone(extension)
+	delete extensionClone.files[index].functions
+
+	let output = JSON.stringify(extensionClone, null, 2)
+
+	// Find the exact filename block for imgm.dll and insert/replace functions
+	// NOTE: This relies on syntax of YY: before: (filename:...) after: (init:...)
+
+	const fileBlockRegex = new RegExp(
+		`("filename":\\s*"imgm.dll",.*?\\n?\\s*"final":\\s*"",.*?)\\n?\\s*(.*).*?\\n?\\s*("init":\\s*"",?).*?\\n([\\s]*)`,
+		"s"
+	)
+
+	// add functions back
+	output = output.replace(fileBlockRegex, (match, fileContent, indent) => {
+		const fnIndent = indent + "  "
+		const compactFunctions = allFunctions
+			.map((fn) => fnIndent + JSON.stringify(fn))
+			.join(",\n")
+
+		const functionsBlock = `${indent}"functions": [\n${compactFunctions}\n${indent}]`
+
+		return `${fileContent}\n${indent}${functionsBlock},\n${indent}"init":"",\n${indent}`
+	})
+
+	if (extensionFile.update(output)) {
+		extensionFile.commit()
+	}
 }
 
 // #endregion

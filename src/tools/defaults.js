@@ -91,6 +91,7 @@ const gmConfig = {
 		process.env.PROGRAMDATA || "/var/lib",
 		"GameMakerStudio2"
 	), // e.g. C:/ProgramData/GameMakerStudio2/
+	projectDir: "src/gm/ImGM/",
 }
 
 const parserConfig = {

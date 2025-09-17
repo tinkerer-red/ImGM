@@ -138,4 +138,14 @@ npm test
 
 # License
 
-By contributing, you agree that your contributions will be licensed under the [project's license.](LICENSE)
+## Contributor License Agreement (CLA)
+
+By submitting code, documentation, or other content ("Contribution") to this project, you agree to the following terms:
+
+1. You certify that your Contribution is original and that you have the legal right to submit it.
+2. You grant the project maintainer (Kenan Masri) a perpetual, worldwide, non-exclusive, royalty-free license to use, reproduce, modify, distribute, and sublicense your Contribution as part of the project.
+3. You acknowledge that your Contribution may be incorporated into software licensed under terms that differ from your original submission.
+4. You agree that no compensation is due for your Contribution.
+
+To contribute, you must include a signed-off-by line in your pull request:
+`Signed-off-by: [Your Name] <your.email@example.com>`

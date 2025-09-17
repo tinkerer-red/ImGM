@@ -139,3 +139,34 @@ export function stripLineCommentPrefix(input) {
 		.join("\n")
 	return x
 }
+
+/**
+ *
+ * @param {String} input
+ * @returns {String}
+ */
+export function removeTrailingCommas(input) {
+	const commaIndicesToRemove = []
+
+	for (let i = 0; i < input.length; i++) {
+		if (input[i] !== ",") continue
+
+		// find non-whitespace character next..
+		let lookahead = i + 1
+		while (lookahead < input.length && input.charCodeAt(lookahead) <= 32) {
+			lookahead++
+		}
+		const nextChar = input[lookahead] // If the comma is followed by a closing bracket or brace, mark it for removal
+		if (nextChar === "]" || nextChar === "}") {
+			commaIndicesToRemove.push(i)
+		}
+	}
+
+	let cleaned = input // Remove commas from original, adjusting for shifting indices
+	for (let i = 0; i < commaIndicesToRemove.length; i++) {
+		const index = commaIndicesToRemove[i] - i
+		cleaned = cleaned.slice(0, index) + cleaned.slice(index + 1)
+	}
+
+	return cleaned
+}
