@@ -106,7 +106,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 
 
-set(PROJECT_NAME ImGM)
+set(PROJECT_NAME ImGMDll)
 
 ################################################################################
 # Source groups
