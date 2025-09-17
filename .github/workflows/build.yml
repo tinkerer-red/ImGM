@@ -51,7 +51,8 @@ jobs:
                     tar -xzf "cmake.tar.gz" --strip-components=1 -C $CMAKE_DIR
                   }
 
-                  echo "$CMAKE_DIR/bin" >> $env:GITHUB_PATH
+                  $env:PATH = "$CMAKE_DIR/bin;$env:PATH"
+                  cmake --version
 
             - name: Install Premake
               uses: abel0b/setup-premake@v2.4
