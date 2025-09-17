@@ -31,10 +31,23 @@ jobs:
             - name: Install Python Dependencies
               run: pip install -r requirements.txt
 
-            - name: Install Newer CMake
-              uses: ssrobins/install-cmake@v1
-              with:
-                  version: "4.1.1"
+            - name: Manual Install CMake
+              run: |
+                CMAKE_VERSION=4.1.1
+                CMAKE_DIR="$HOME/cmake-$CMAKE_VERSION"
+                mkdir -p "$CMAKE_DIR"
+
+                if [[ "$RUNNER_OS" == "Linux" ]]; then
+                  curl -sSL "https://cmake.org/files/v4.1/cmake-${CMAKE_VERSION}-linux-x86_64.tar.gz" | tar --strip-components=1 -xz -C "$CMAKE_DIR"
+                elif [[ "$RUNNER_OS" == "macOS" ]]; then
+                  curl -sSL "https://cmake.org/files/v4.1/cmake-${CMAKE_VERSION}-macos-universal.tar.gz" | tar --strip-components=1 -xz -C "$CMAKE_DIR"
+                elif [[ "$RUNNER_OS" == "Windows" ]]; then
+                  curl -sSL -o cmake.zip "https://cmake.org/files/v4.1/cmake-${CMAKE_VERSION}-windows-x86_64.zip"
+                  unzip -q cmake.zip -d "$CMAKE_DIR"
+                fi
+
+                echo "$CMAKE_DIR/bin" >> $GITHUB_PATH
+
 
             - name: Install Premake
               uses: abel0b/setup-premake@v2.4
