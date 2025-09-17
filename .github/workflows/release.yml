@@ -57,7 +57,7 @@ jobs:
               run: zip ImGM-${{ runner.os }}.zip ${{ steps.artifact.outputs.path }}
 
             - name: Upload Artifact
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   name: ImGM-${{ runner.os }}
                   path: ImGM-${{ runner.os }}.zip
@@ -70,7 +70,7 @@ jobs:
             - uses: actions/checkout@v4
 
             - name: Download all artifacts
-              uses: actions/download-artifact@v3
+              uses: actions/download-artifact@v4
               with:
                   path: release-assets
 
@@ -84,11 +84,11 @@ jobs:
 
             - name: Extract Changelog for Release
               run: |
-                awk '/## 
+                awk '/##
 
                 \[${{ github.ref_name }}\]
 
-                /,/^## 
+                /,/^##
 
                 \[/' CHANGELOG.md >> changelog.txt || true
 
