@@ -4,13 +4,8 @@ on:
     workflow_dispatch:
 
 jobs:
-    build:
-        strategy:
-            matrix:
-                os: [windows-latest, ubuntu-latest, macos-latest]
-
-        runs-on: ${{ matrix.os }}
-
+    build-windows:
+        runs-on: windows-latest
         steps:
             - name: Checkout Repository
               uses: actions/checkout@v4
@@ -26,9 +21,9 @@ jobs:
               uses: actions/cache@v3
               with:
                   path: ~/.npm
-                  key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+                  key: windows-npm-${{ hashFiles('**/package-lock.json') }}
                   restore-keys: |
-                      ${{ runner.os }}-npm-
+                      windows-npm-
 
             - name: Install NPM Dependencies
               run: npm ci
@@ -41,18 +36,10 @@ jobs:
               with:
                   version: "5.0.0-beta2"
 
-            # Premake
-            - name: Run Premake (Windows)
-              if: matrix.os == 'windows-latest'
+            - name: Run Premake
               run: premake5 vs2022
 
-            - name: Run Premake (Linux/macOS)
-              if: matrix.os != 'windows-latest'
-              run: premake5 gmake2
-
-            # Convert SLN to CMake (Windows only)
             - name: Convert SLN to CMake
-              if: matrix.os == 'windows-latest'
               run: |
                   if (!(Test-Path "cmake-converter.exe")) {
                     Write-Host "cmake-converter.exe not found!"
@@ -60,22 +47,10 @@ jobs:
                   }
                   cmake-converter.exe -s ./src/dll/dll.sln
 
-            # Configure CMake
-            - name: Configure CMake (Windows)
-              if: matrix.os == 'windows-latest'
+            - name: Configure CMake
               run: cmake -S src/dll -B src/dll/build -G "Visual Studio 17 2022" -A x64
 
-            - name: Configure CMake (Linux/macOS) Debug
-              if: matrix.os != 'windows-latest'
-              run: cmake -S src/dll -B src/dll/build-debug -DCMAKE_BUILD_TYPE=Debug
-
-            - name: Configure CMake (Linux/macOS) Release
-              if: matrix.os != 'windows-latest'
-              run: cmake -S src/dll -B src/dll/build-release -DCMAKE_BUILD_TYPE=Release
-
-            # Build Debug
-            - name: Build Debug (Windows)
-              if: matrix.os == 'windows-latest'
+            - name: Build Debug
               run: |
                   cmake --build src/dll/build --config Debug
 
@@ -96,33 +71,13 @@ jobs:
                     }
                   }
 
-            - name: Build Debug (Linux/macOS)
-              if: matrix.os != 'windows-latest'
-              run: cmake --build src/dll/build-debug
-
-            - name: Rename Debug Artifacts (Linux/macOS)
-              if: matrix.os != 'windows-latest'
-              run: |
-                  for file in ImGM.so ImGM.dylib ImGM.yy; do
-                    src="src/gm/ImGM/extensions/ImGM/$file"
-                    dst="src/gm/ImGM/extensions/ImGM/${file%.${file##*.}}.debug.${file##*.}"
-                    [ -f "$src" ] && mv "$src" "$dst" || echo "$file not found, skipping..."
-                  done
-
-            # Build Release
-            - name: Build Release (Windows)
-              if: matrix.os == 'windows-latest'
+            - name: Build Release
               run: cmake --build src/dll/build --config Release
 
-            - name: Build Release (Linux/macOS)
-              if: matrix.os != 'windows-latest'
-              run: cmake --build src/dll/build-release
-
-            # Upload Artifacts
             - name: Upload Release Artifacts
               uses: actions/upload-artifact@v4
               with:
-                  name: ImGM-Release-${{ matrix.os }}-${{ github.sha }}
+                  name: ImGM-Release-windows-${{ github.sha }}
                   path: |
                       src/gm/ImGM/extensions/ImGM/ImGM.dll
                       src/gm/ImGM/extensions/ImGM/ImGM.exp
@@ -135,12 +90,160 @@ jobs:
             - name: Upload Debug Artifacts
               uses: actions/upload-artifact@v4
               with:
-                  name: ImGM-Debug-${{ matrix.os }}-${{ github.sha }}
+                  name: ImGM-Debug-windows-${{ github.sha }}
                   path: |
                       src/gm/ImGM/extensions/ImGM/ImGM.debug.dll
                       src/gm/ImGM/extensions/ImGM/ImGM.debug.exp
                       src/gm/ImGM/extensions/ImGM/ImGM.debug.lib
                       src/gm/ImGM/extensions/ImGM/ImGM.debug.pdb
+                      src/gm/ImGM/extensions/ImGM/ImGM.debug.so
+                      src/gm/ImGM/extensions/ImGM/ImGM.debug.dylib
+                      src/gm/ImGM/extensions/ImGM/ImGM.debug.yy
+
+    build-ubuntu:
+        needs: build-windows
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.ref }}
+
+            - name: Setup NodeJS
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+
+            - name: Cache NPM
+              uses: actions/cache@v3
+              with:
+                  path: ~/.npm
+                  key: ubuntu-npm-${{ hashFiles('**/package-lock.json') }}
+                  restore-keys: |
+                      ubuntu-npm-
+
+            - name: Install NPM Dependencies
+              run: npm ci
+
+            - name: Install Python Dependencies
+              run: pip install -r requirements.txt
+
+            - name: Setup Premake
+              uses: abel0b/setup-premake@v2.4
+              with:
+                  version: "5.0.0-beta2"
+
+            - name: Run Premake
+              run: premake5 gmake2
+
+            - name: Configure CMake Debug
+              run: cmake -S src/dll -B src/dll/build-debug -DCMAKE_BUILD_TYPE=Debug
+
+            - name: Configure CMake Release
+              run: cmake -S src/dll -B src/dll/build-release -DCMAKE_BUILD_TYPE=Release
+
+            - name: Build Debug
+              run: cmake --build src/dll/build-debug
+
+            - name: Rename Debug Artifacts
+              run: |
+                  for file in ImGM.so ImGM.dylib ImGM.yy; do
+                    src="src/gm/ImGM/extensions/ImGM/$file"
+                    dst="src/gm/ImGM/extensions/ImGM/${file%.${file##*.}}.debug.${file##*.}"
+                    [ -f "$src" ] && mv "$src" "$dst" || echo "$file not found, skipping..."
+                  done
+
+            - name: Build Release
+              run: cmake --build src/dll/build-release
+
+            - name: Upload Release Artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ImGM-Release-ubuntu-${{ github.sha }}
+                  path: |
+                      src/gm/ImGM/extensions/ImGM/ImGM.so
+                      src/gm/ImGM/extensions/ImGM/ImGM.dylib
+                      src/gm/ImGM/extensions/ImGM/ImGM.yy
+
+            - name: Upload Debug Artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ImGM-Debug-ubuntu-${{ github.sha }}
+                  path: |
+                      src/gm/ImGM/extensions/ImGM/ImGM.debug.so
+                      src/gm/ImGM/extensions/ImGM/ImGM.debug.dylib
+                      src/gm/ImGM/extensions/ImGM/ImGM.debug.yy
+
+    build-macos:
+        needs: build-ubuntu
+        runs-on: macos-latest
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.ref }}
+
+            - name: Setup NodeJS
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+
+            - name: Cache NPM
+              uses: actions/cache@v3
+              with:
+                  path: ~/.npm
+                  key: macos-npm-${{ hashFiles('**/package-lock.json') }}
+                  restore-keys: |
+                      macos-npm-
+
+            - name: Install NPM Dependencies
+              run: npm ci
+
+            - name: Install Python Dependencies
+              run: pip install -r requirements.txt
+
+            - name: Setup Premake
+              uses: abel0b/setup-premake@v2.4
+              with:
+                  version: "5.0.0-beta2"
+
+            - name: Run Premake
+              run: premake5 gmake2
+
+            - name: Configure CMake (Debug)
+              run: cmake -S src/dll -B src/dll/build-debug -DCMAKE_BUILD_TYPE=Debug
+
+            - name: Configure CMake (Release)
+              run: cmake -S src/dll -B src/dll/build-release -DCMAKE_BUILD_TYPE=Release
+
+            - name: Build Debug
+              run: cmake --build src/dll/build-debug
+
+            - name: Rename Debug Artifacts
+              run: |
+                  for file in ImGM.so ImGM.dylib ImGM.yy; do
+                    src="src/gm/ImGM/extensions/ImGM/$file"
+                    dst="src/gm/ImGM/extensions/ImGM/${file%.${file##*.}}.debug.${file##*.}"
+                    [ -f "$src" ] && mv "$src" "$dst" || echo "$file not found, skipping..."
+                  done
+
+            - name: Build Release
+              run: cmake --build src/dll/build-release
+
+            - name: Upload Release Artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ImGM-Release-macos-${{ github.sha }}
+                  path: |
+                      src/gm/ImGM/extensions/ImGM/ImGM.so
+                      src/gm/ImGM/extensions/ImGM/ImGM.dylib
+                      src/gm/ImGM/extensions/ImGM/ImGM.yy
+
+            - name: Upload Debug Artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ImGM-Debug-macos-${{ github.sha }}
+                  path: |
                       src/gm/ImGM/extensions/ImGM/ImGM.debug.so
                       src/gm/ImGM/extensions/ImGM/ImGM.debug.dylib
                       src/gm/ImGM/extensions/ImGM/ImGM.debug.yy
