@@ -1,10 +1,12 @@
-name: Build and Test ImGM
+name: Build
+run-name: "Build - GM Runtime ${{ inputs.runtime }}"
 
 on:
     workflow_dispatch:
         inputs:
             runtime:
                 description: "Target runtime"
+                default: "2024.11.0.227"
                 required: false
 env:
     CMAKE_VERSION: "4.1.1"
@@ -17,7 +19,7 @@ jobs:
     build-imgm:
         strategy:
             matrix:
-                os: [windows-latest] # ignore for now:    , ubuntu-latest, macos-latest]
+                os: [windows-latest] # ignore for now: ubuntu-latest, macos-latest
         runs-on: ${{ matrix.os }}
         name: Build ImGM (${{ matrix.os }})
         steps:
@@ -124,9 +126,9 @@ jobs:
         needs: build-imgm
         strategy:
             matrix:
-                os: [windows-latest, ubuntu-latest, macos-latest]
+                os: [windows-latest] # ubuntu-latest, macos-latest
         runs-on: ${{ matrix.os }}
-        name: Test GameMaker (${{ matrix.os }})
+        name: Test ImGM (${{ matrix.os }}) using ${{ inputs.runtime }}
         steps:
             - name: Checkout
               uses: actions/checkout@v4
