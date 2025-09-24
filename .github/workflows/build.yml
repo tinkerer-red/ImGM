@@ -114,18 +114,24 @@ jobs:
                   $base = "${{ env.DLL_PATH }}"
                   foreach ($f in $artifacts) {
                     $src = Join-Path $base $f
-                    $dst = Join-Path $base ("{0}.debug{1}" -f [System.IO.Path]::GetFileNameWithoutExtension($f), [System.IO.Path]::GetExtension($f))
+                    $newName = "{0}.debug{1}" -f [System.IO.Path]::GetFileNameWithoutExtension($f), [System.IO.Path]::GetExtension($f)
+                    $dst = Join-Path $base $newName
                     if (Test-Path $src) {
                       Rename-Item -Path $src -NewName $dst
                     }
                   }
                 } else {
+                  $base = "${{ env.DLL_PATH }}"
                   $files = @("ImGM.so", "ImGM.dylib", "ImGM.yy")
                   foreach ($file in $files) {
-                    $src = "${{ env.DLL_PATH }}/$file"
-                    $dst = "${{ env.DLL_PATH }}/${file.Substring(0, $file.LastIndexOf('.'))}.debug.${file.Split('.')[-1]}"
+                    $src = Join-Path $base $file
+                    $nameOnly = $file.Substring(0, $file.LastIndexOf('.'))
+                    $ext = $file.Split('.')[-1]
+                    $newName = "$nameOnly.debug.$ext"
+                    $dst = Join-Path $base $newName
+
                     if (Test-Path $src) {
-                      Rename-Item -Path $src -NewName $dst
+                      Rename-Item -Path $src -NewName $newName
                     }
                   }
                 }
