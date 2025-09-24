@@ -89,7 +89,7 @@ jobs:
 
             - name: Prepare ImGM Modules
               env:
-                  GM_DATA: ${{ env.IGOR_USER_DIR }}
+                  GM_DATA: ${{ steps.igor.outputs.user-dir }}
               run: npm run modules:copy -- --gm --imgui --ext all
 
             - name: Run Premake
@@ -117,8 +117,16 @@ jobs:
                     $newName = "{0}.debug{1}" -f [System.IO.Path]::GetFileNameWithoutExtension($f), [System.IO.Path]::GetExtension($f)
                     $dst = Join-Path $base $newName
                     if (Test-Path $src) {
-                      Rename-Item -Path $src -NewName $dst
-                    }
+                        try {
+                          Rename-Item -Path $src -NewName $newName -ErrorAction Stop
+                          Write-Host "Renamed $f to $newName"
+                        } catch {
+                          Write-Host "Failed to rename $src → $newName"
+                          Write-Host "Error: $_"
+                        }
+                      } else {
+                        Write-Host "Skipping file not found: $src"
+                      }
                   }
                 } else {
                   $base = "${{ env.DLL_PATH }}"
@@ -131,8 +139,17 @@ jobs:
                     $dst = Join-Path $base $newName
 
                     if (Test-Path $src) {
-                      Rename-Item -Path $src -NewName $newName
-                    }
+                        try {
+                          Rename-Item -Path $src -NewName $newName -ErrorAction Stop
+                          Write-Host "Renamed $f to $newName"
+                        } catch {
+                          Write-Host "Failed to rename $src → $newName"
+                          Write-Host "Error: $_"
+                        }
+                      } else {
+                        Write-Host "Skipping file not found: $src"
+                      }
+
                   }
                 }
 
