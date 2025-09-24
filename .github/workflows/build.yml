@@ -94,12 +94,12 @@ jobs:
 
             - name: Run Premake
               run: |
-                  if [ "${{ matrix.os }}" = "windows-latest" ]; then
-                    premake5 vs2022
-                    cmake-converter.exe -s ./src/dll/dll.sln
-                  else
-                    premake5 gmake2
-                  fi
+                if ($env:RUNNER_OS -eq "Windows") {
+                  premake5 vs2022
+                  cmake-converter.exe -s ./src/dll/dll.sln
+                } else {
+                  premake5 gmake2
+                }
 
             - name: Configure CMake
               run: |
@@ -108,24 +108,27 @@ jobs:
 
             - name: Build Debug
               run: |
-                  cmake --build src/dll/build-debug
-                  if [ "${{ matrix.os }}" = "windows-latest" ]; then
-                    pwsh -Command "
-                      \$artifacts = @('ImGM.dll','ImGM.exp','ImGM.lib','ImGM.pdb','ImGM.so','ImGM.dylib','ImGM.yy');
-                      \$base = '${{ env.DLL_PATH }}';
-                      foreach (\$f in \$artifacts) {
-                        \$src = Join-Path \$base \$f;
-                        \$dst = Join-Path \$base ('{0}.debug{1}' -f [System.IO.Path]::GetFileNameWithoutExtension(\$f), [System.IO.Path]::GetExtension(\$f));
-                        if (Test-Path \$src) { Rename-Item \$src \$dst }
-                      }
-                    "
-                  else
-                    for file in ImGM.so ImGM.dylib ImGM.yy; do
-                      src="${{ env.DLL_PATH }}/$file"
-                      dst="${{ env.DLL_PATH }}/${file%.${file##*.}}.debug.${file##*.}"
-                      [ -f "$src" ] && mv "$src" "$dst"
-                    done
-                  fi
+                cmake --build src/dll/build-debug
+                if ($env:RUNNER_OS -eq "Windows") {
+                  $artifacts = @("ImGM.dll", "ImGM.exp", "ImGM.lib", "ImGM.pdb", "ImGM.so", "ImGM.dylib", "ImGM.yy")
+                  $base = "${{ env.DLL_PATH }}"
+                  foreach ($f in $artifacts) {
+                    $src = Join-Path $base $f
+                    $dst = Join-Path $base ("{0}.debug{1}" -f [System.IO.Path]::GetFileNameWithoutExtension($f), [System.IO.Path]::GetExtension($f))
+                    if (Test-Path $src) {
+                      Rename-Item -Path $src -NewName $dst
+                    }
+                  }
+                } else {
+                  $files = @("ImGM.so", "ImGM.dylib", "ImGM.yy")
+                  foreach ($file in $files) {
+                    $src = "${{ env.DLL_PATH }}/$file"
+                    $dst = "${{ env.DLL_PATH }}/${file.Substring(0, $file.LastIndexOf('.'))}.debug.${file.Split('.')[-1]}"
+                    if (Test-Path $src) {
+                      Rename-Item -Path $src -NewName $dst
+                    }
+                  }
+                }
 
             - name: Build Release
               run: cmake --build src/dll/build-release
