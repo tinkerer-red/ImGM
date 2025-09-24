@@ -15,10 +15,6 @@ env:
     DLL_PATH: "src/gm/ImGM/extensions/ImGM"
     YYP_PATH: "${{ github.workspace }}/src/gm/ImGM/ImGM.yyp"
 
-defaults:
-  run:
-    working-directory: "${{ github.workspace }}"
-
 jobs:
     build-imgm:
         strategy:
