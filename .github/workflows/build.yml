@@ -92,8 +92,8 @@ jobs:
                 echo "IGOR_USER_DIR=${{ steps.igor.outputs.user-dir }}" >> $GITHUB_ENV
                 echo "GM_RUNTIME=${{ steps.igor.outputs.runtime-dir }}" >> $GITHUB_ENV
 
-            - name: Prepare ImGM Modules
-              run: npm run modules:copy -- --gm --imgui --ext all
+            - name: ImGM Run modules:copy
+              run: npm run modules:copy -- --imgui --ext all
               env:
                 GM_RUNTIME: ${{ steps.igor.outputs.runtime-dir }}
 

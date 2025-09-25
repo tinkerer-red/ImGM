@@ -37,7 +37,7 @@
 #define WriteLog(...) DebugConsoleOutput("[ImGui_GM] %s\n", __VA_ARGS__)
 
 // Helpers
-static inline ImVec4 GMCOLOR_TO(int col, float alpha) { 
+static inline ImVec4 GMCOLOR_TO(int col, float alpha) {
 	float r = (float)(col & 0xFF) / 0xFF;
 	float g = (float)((col >> 8) & 0xFF) / 0xFF;
 	float b = (float)((col >> 16) & 0xFF) / 0xFF;
