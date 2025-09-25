@@ -36,11 +36,11 @@ GMFUNC(__imgui_get_window_drawlist) {
 
 GMFUNC(__imgui_drawlist_add_line) {
 	ImDrawList* list = (ImDrawList*)YYGetPtr(arg, 0);
-	double x1 = YYGetReal(arg, 1);
-	double y1 = YYGetReal(arg, 2);
-	double x2 = YYGetReal(arg, 3);
-	double y2 = YYGetReal(arg, 4);
-	int col = YYGetReal(arg, 5);
+	float x1 = static_cast<float>(YYGetReal(arg, 1));
+	float y1 = static_cast<float>(YYGetReal(arg, 2));
+	float x2 = static_cast<float>(YYGetReal(arg, 3));
+	float y2 = static_cast<float>(YYGetReal(arg, 4));
+	int col = (int)YYGetReal(arg, 5);
 	double thickness = YYGetReal(arg, 6);
 	GMDEFAULT(1);
 	GMOVERRIDE(DrawListAddLine);
@@ -51,16 +51,16 @@ GMFUNC(__imgui_drawlist_add_line) {
 
 GMFUNC(__imgui_drawlist_add_rect) {
 	ImDrawList* list = (ImDrawList*)YYGetPtr(arg, 0);
-	double x1 = YYGetReal(arg, 1);
-	double y1 = YYGetReal(arg, 2);
-	double x2 = YYGetReal(arg, 3);
-	double y2 = YYGetReal(arg, 4);
+	float x1 = static_cast<float>(YYGetReal(arg, 1));
+	float y1 = static_cast<float>(YYGetReal(arg, 2));
+	float x2 = static_cast<float>(YYGetReal(arg, 3));
+	float y2 = static_cast<float>(YYGetReal(arg, 4));
 	int col = YYGetReal(arg, 5);
-	double rounding = YYGetReal(arg, 6);
+	float rounding = static_cast<float>(YYGetReal(arg, 6));
 	GMDEFAULT(0);
 	ImDrawFlags flags = YYGetInt64(arg, 7);
 	GMDEFAULT(ImDrawFlags.None);
-	double thickness = YYGetReal(arg, 8);
+	float thickness = static_cast<float>(YYGetReal(arg, 8));
 	GMDEFAULT(1);
 	GMOVERRIDE(DrawListAddRect);
 
@@ -70,14 +70,14 @@ GMFUNC(__imgui_drawlist_add_rect) {
 
 GMFUNC(__imgui_drawlist_add_rect_filled) {
 	ImDrawList* list = (ImDrawList*)YYGetPtr(arg, 0);
-	double x1 = YYGetReal(arg, 1);
-	double y1 = YYGetReal(arg, 2);
-	double x2 = YYGetReal(arg, 3);
-	double y2 = YYGetReal(arg, 4);
-	int col = YYGetReal(arg, 5);
-	double rounding = YYGetReal(arg, 6);
+	float x1 = static_cast<float>(YYGetReal(arg, 1));
+	float y1 = static_cast<float>(YYGetReal(arg, 2));
+	float x2 = static_cast<float>(YYGetReal(arg, 3));
+	float y2 = static_cast<float>(YYGetReal(arg, 4));
+	int col = (int)YYGetReal(arg, 5);
+	float rounding = static_cast<float>(YYGetReal(arg, 6));
 	GMDEFAULT(0);
-	ImDrawFlags flags = YYGetInt64(arg, 7);
+	ImDrawFlags flags = (int)YYGetReal(arg, 7);
 	GMDEFAULT(ImDrawFlags.None);
 	GMOVERRIDE(DrawListAddRectFilled);
 
@@ -87,14 +87,14 @@ GMFUNC(__imgui_drawlist_add_rect_filled) {
 
 GMFUNC(__imgui_drawlist_add_rect_filled_multicolor) {
 	ImDrawList* list = (ImDrawList*)YYGetPtr(arg, 0);
-	double x1 = YYGetReal(arg, 1);
-	double y1 = YYGetReal(arg, 2);
-	double x2 = YYGetReal(arg, 3);
-	double y2 = YYGetReal(arg, 4);
-	int col1 = YYGetReal(arg, 5);
-	int col2 = YYGetReal(arg, 6);
-	int col3 = YYGetReal(arg, 7);
-	int col4 = YYGetReal(arg, 8);
+	float x1 = static_cast<float>(YYGetReal(arg, 1));
+	float y1 = static_cast<float>(YYGetReal(arg, 2));
+	float x2 = static_cast<float>(YYGetReal(arg, 3));
+	float y2 = static_cast<float>(YYGetReal(arg, 4));
+	ImU32 col1 = YYGetUint32(arg, 5);
+	ImU32 col2 = YYGetUint32(arg, 6);
+	ImU32 col3 = YYGetUint32(arg, 7);
+	ImU32 col4 = YYGetReal(arg, 8);
 	GMOVERRIDE(DrawListAddRectFilledMultiColor);
 
 	list->AddRectFilledMultiColor(ImVec2(x1, y1), ImVec2(x2, y2), col1 | (0xFF << 24), col2 | (0xFF << 24), col3 | (0xFF << 24), col4 | (0xFF << 24));
@@ -103,16 +103,16 @@ GMFUNC(__imgui_drawlist_add_rect_filled_multicolor) {
 
 GMFUNC(__imgui_drawlist_add_quad) {
 	ImDrawList* list = (ImDrawList*)YYGetPtr(arg, 0);
-	double x1 = YYGetReal(arg, 1);
-	double y1 = YYGetReal(arg, 2);
-	double x2 = YYGetReal(arg, 3);
-	double y2 = YYGetReal(arg, 4);
-	double x3 = YYGetReal(arg, 5);
-	double y3 = YYGetReal(arg, 6);
-	double x4 = YYGetReal(arg, 7);
-	double y4 = YYGetReal(arg, 8);
-	int col = YYGetReal(arg, 9);
-	double thickness = YYGetReal(arg, 10);
+	float x1 = static_cast<float>(YYGetReal(arg, 1));
+	float y1 = static_cast<float>(YYGetReal(arg, 2));
+	float x2 = static_cast<float>(YYGetReal(arg, 3));
+	float y2 = static_cast<float>(YYGetReal(arg, 4));
+	float x3 = static_cast<float>(YYGetReal(arg, 5));
+	float y3 = static_cast<float>(YYGetReal(arg, 6));
+	float x4 = static_cast<float>(YYGetReal(arg, 7));
+	float y4 = static_cast<float>(YYGetReal(arg, 8));
+	int col = (int)YYGetReal(arg, 9);
+	float thickness = static_cast<float>(YYGetReal(arg, 10));
 	GMDEFAULT(1);
 	GMOVERRIDE(DrawListAddQuad);
 
@@ -122,15 +122,15 @@ GMFUNC(__imgui_drawlist_add_quad) {
 
 GMFUNC(__imgui_drawlist_add_quad_filled) {
 	ImDrawList* list = (ImDrawList*)YYGetPtr(arg, 0);
-	double x1 = YYGetReal(arg, 1);
-	double y1 = YYGetReal(arg, 2);
-	double x2 = YYGetReal(arg, 3);
-	double y2 = YYGetReal(arg, 4);
-	double x3 = YYGetReal(arg, 5);
-	double y3 = YYGetReal(arg, 6);
-	double x4 = YYGetReal(arg, 7);
-	double y4 = YYGetReal(arg, 8);
-	int col = YYGetReal(arg, 9);
+	float x1 = static_cast<float>(YYGetReal(arg, 1));
+	float y1 = static_cast<float>(YYGetReal(arg, 2));
+	float x2 = static_cast<float>(YYGetReal(arg, 3));
+	float y2 = static_cast<float>(YYGetReal(arg, 4));
+	float x3 = static_cast<float>(YYGetReal(arg, 5));
+	float y3 = static_cast<float>(YYGetReal(arg, 6));
+	float x4 = static_cast<float>(YYGetReal(arg, 7));
+	float y4 = static_cast<float>(YYGetReal(arg, 8));
+	int col = (int)YYGetReal(arg, 9);
 	GMOVERRIDE(DrawListAddQuadFilled);
 
 	list->AddQuadFilled(ImVec2(x1, y1), ImVec2(x2, y2), ImVec2(x3, y3), ImVec2(x4, y4), col | (0xFF << 24));
@@ -139,14 +139,14 @@ GMFUNC(__imgui_drawlist_add_quad_filled) {
 
 GMFUNC(__imgui_drawlist_add_triangle) {
 	ImDrawList* list = (ImDrawList*)YYGetPtr(arg, 0);
-	double x1 = YYGetReal(arg, 1);
-	double y1 = YYGetReal(arg, 2);
-	double x2 = YYGetReal(arg, 3);
-	double y2 = YYGetReal(arg, 4);
-	double x3 = YYGetReal(arg, 5);
-	double y3 = YYGetReal(arg, 6);
-	int col = YYGetReal(arg, 7);
-	double thickness = YYGetReal(arg, 8);
+	float x1 = static_cast<float>(YYGetReal(arg, 1));
+	float y1 = static_cast<float>(YYGetReal(arg, 2));
+	float x2 = static_cast<float>(YYGetReal(arg, 3));
+	float y2 = static_cast<float>(YYGetReal(arg, 4));
+	float x3 = static_cast<float>(YYGetReal(arg, 5));
+	float y3 = static_cast<float>(YYGetReal(arg, 6));
+	int col = (int)YYGetReal(arg, 7);
+	float thickness = static_cast<float>(YYGetReal(arg, 8));
 	GMDEFAULT(1);
 	GMOVERRIDE(DrawListAddTriangle);
 
@@ -162,7 +162,7 @@ GMFUNC(__imgui_drawlist_add_triangle_filled) {
 	double y2 = YYGetReal(arg, 4);
 	double x3 = YYGetReal(arg, 5);
 	double y3 = YYGetReal(arg, 6);
-	int col = YYGetReal(arg, 7);
+	int col = (int)YYGetReal(arg, 9);
 	GMOVERRIDE(DrawListAddTriangleFilled);
 
 	list->AddTriangleFilled(ImVec2(x1, y1), ImVec2(x2, y2), ImVec2(x3, y3), col | (0xFF << 24));
@@ -174,10 +174,10 @@ GMFUNC(__imgui_drawlist_add_circle) {
 	double x = YYGetReal(arg, 1);
 	double y = YYGetReal(arg, 2);
 	double radius = YYGetReal(arg, 3);
-	int col = YYGetReal(arg, 4);
-	int num_segments = YYGetReal(arg, 5);
+	int col = (int)YYGetReal(arg, 4);
+	int num_segments = (int)YYGetReal(arg, 5);
 	GMDEFAULT(0);
-	double thickness = YYGetReal(arg, 6);
+	float thickness = static_cast<float>(YYGetReal(arg, 6));
 	GMDEFAULT(1);
 	GMOVERRIDE(DrawListAddCircle);
 

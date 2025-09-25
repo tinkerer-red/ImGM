@@ -5007,6 +5007,8 @@ function ImGui() constructor {
 
     /// @section Internal
     /// @desc Where the (GML) magic happens, safe from code generation
+    static __imgm = __ImGM();
+
     static __State = undefined;
     static __Window = undefined;
 
@@ -5024,8 +5026,7 @@ function ImGui() constructor {
     static __Uniform = shader_get_uniform(shdImGui, "u_ClipRect");
     static __InputMapping = __imgui_create_input_mapping();
     static __CursorMapping = __imgui_create_cursor_mapping();
-
-    static __GFlags = ImGuiGFlags.IMPL_WIN32 | ImGuiGFlags.IMPL_DX11;// | ImGuiGFlags.GM;
+    static __GFlags = IMGM_GFLAGS;
 
     static __CursorPrev = -1;
     static __InputRequested = false;
@@ -5120,6 +5121,8 @@ function ImGui() constructor {
     static __NewFrame = function(state=undefined) {
         if !ImGui.__Initialized return;
         state ??= __State; if state != __State state.Use();
+
+        ImGui.__imgm.Utils.Update();
 
         var _dwidth = display_get_width(), _dheight = display_get_height(), _focus = false;
         var _wwidth = 0, _wheight = 0;
@@ -5313,39 +5316,3 @@ function ImGui() constructor {
 
     return self;
 };
-
-// Version Check
-
-try {
-    var _get = static_get(new ImGui());
-    show_debug_message("[ImGM - INFO] Successfully passed version check");
-
-} catch(e) {
-    if e[$ "message"] {
-        show_error(string(e), true);
-    }
-
-    var ind = asset_get_index("ImGui_");
-    if (ind == -1) {
-        if (GM_build_type == "run") {
-            if (!file_exists("warning.bin")) {
-                var b = buffer_create(2, buffer_fixed, 1);
-                buffer_poke(b, 0, buffer_u16, 26984);
-                buffer_save(b, "warning.bin");
-                buffer_delete(b);
-                var _msg = "[WARNING]\nIt looks like you're using a version of GameMaker that does not support the \"static_get\" function.\n\nTo effectively use this extension, please rename the \"ImGui\" script and function to \"ImGui_\" and uncomment the ImGui globalvar delcaration below this warning (search: imgui_compat) to properly access the ImGui namespace\n\nThis warning will only appear when running from the IDE, additionally a stub file has been created in your game's save data directory to prevent this warning from displaying again.";
-                show_message(_msg);
-                game_end();
-            }
-        }
-    } else {
-        /*
-            NOTE: If using LTS or unsupported runtime, rename this script and constructor to ImGui_ and uncomment the below globalvar delcaration
-        */
-
-        // [imgui_compat]
-        //globalvar ImGui;
-        variable_global_set("ImGui", new ImGui_());
-    }
-    show_debug_message("[ImGM - WARNING] Failed version check, it is advised that you use a runtime that supports the \"static_get\" function");
-}

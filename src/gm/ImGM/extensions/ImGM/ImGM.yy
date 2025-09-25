@@ -498,8 +498,8 @@
   "optionsFile":"options.json",
   "packageId":"",
   "parent":{
-    "name":"Main",
-    "path":"folders/ImGM/Main.yy",
+    "name":"Extensions",
+    "path":"folders/ImGM/Extensions.yy",
   },
   "productId":"",
   "resourceType":"GMExtension",

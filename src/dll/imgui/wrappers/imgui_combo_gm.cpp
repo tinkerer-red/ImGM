@@ -3,7 +3,7 @@
 GMFUNC(__imgui_begin_combo) {
 	const char* label = YYGetString(arg, 0);
 	const char* preview = YYGetString(arg, 1);
-	ImGuiComboFlags flags = YYGetInt64(arg, 2);
+	ImGuiComboFlags flags = (int)YYGetReal(arg, 2);
 
 	Result.kind = VALUE_BOOL;
 	Result.val = ImGui::BeginCombo(label, preview, flags);

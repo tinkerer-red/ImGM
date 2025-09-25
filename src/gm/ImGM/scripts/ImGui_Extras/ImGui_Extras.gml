@@ -1,7 +1,31 @@
-/// Use this script <name>_Extras for additional standalone helpers for ImGui:
-/// These functions will be parsed and included in the docs.
+/// Use this script (or Extras/ImExt<name>_Extras) for additional or custom helpers.
+/// These functions will be parsed and included in the generatable docs.
 
-#region Plot
+#region Example
+
+/*
+
+/// JSDOC
+ **
+ * @function my_custom_function_name
+ * @description Creates a foo table
+ * @param {String} _label The ImGui label
+ * @param {String} title
+ * @param {Array<Real>} _data_array
+ * @param {Bool} [enabled]
+ * @return {Undefined}
+ * @context ImGui
+ *
+function my_custom_function_name(_label, title, _data_array, enabled=true) {
+    ...
+}
+
+*/
+
+
+#endregion
+
+#region Graphics
 
 /**
  * @function plot_lines_with_grid

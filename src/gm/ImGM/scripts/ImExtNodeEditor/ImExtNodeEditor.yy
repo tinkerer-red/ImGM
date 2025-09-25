@@ -6,7 +6,7 @@
   "name":"ImExtNodeEditor",
   "parent":{
     "name":"ImExt",
-    "path":"folders/ImGM/Extensions/ImExt.yy",
+    "path":"folders/ImGM/Scripts/ImExt.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

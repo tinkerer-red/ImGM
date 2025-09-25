@@ -84,13 +84,13 @@ jobs:
 
             - name: Extract Changelog for Release
               run: |
-                awk '/##
+                  awk '/##
 
-                \[${{ github.ref_name }}\]
+                  \[${{ github.ref_name }}\]
 
-                /,/^##
+                  /,/^##
 
-                \[/' CHANGELOG.md >> changelog.txt || true
+                  \[/' CHANGELOG.md >> changelog.txt || true
 
             - name: Create GitHub Release
               uses: softprops/action-gh-release@v1

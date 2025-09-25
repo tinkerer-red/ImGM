@@ -8,7 +8,17 @@ on:
                 description: "Target runtime"
                 default: "2024.13.1.242"
                 required: false
+    workflow_call:
+        inputs:
+            runtime:
+                description: "Target runtime"
+                default: "2024.13.1.242"
+                required: false
+                type: string
+permissions:
+    contents: write
 env:
+    PROJECT_NAME: "ImGM"
     CMAKE_VERSION: "4.1.1"
     NODE_VERSION: "20"
     PREMAKE_VERSION: "5.0.0-beta2"
@@ -19,19 +29,19 @@ jobs:
     build-imgm:
         strategy:
             matrix:
-                os: [windows-latest] # ignore for now: ubuntu-latest, macos-latest
+                os: [windows-latest] # TODO: ignored for now: ubuntu-latest, macos-latest
         runs-on: ${{ matrix.os }}
         name: Build ImGM (${{ matrix.os }})
         environment: GameMaker
         outputs:
-          igor-user-dir: ${{ steps.igor.outputs.user-dir }}
-          igor-runtime-dir: ${{ steps.igor.outputs.runtime-dir }}
+            igor-user-dir: ${{ steps.igor-0.outputs.user-dir }}
+            igor-runtime-dir: ${{ steps.igor-0.outputs.runtime-dir }}
         steps:
-            #region Init Jobs
+            #region Init
             - name: Checkout
               uses: actions/checkout@v4
               with:
-                submodules: recursive
+                  submodules: recursive
 
             - name: Setup Node.js
               uses: actions/setup-node@v4
@@ -54,57 +64,57 @@ jobs:
                   version: ${{ env.PREMAKE_VERSION }}
             #endregion
 
-            #region Setup Jobs
+            #region Setup
             - name: Get YYP version from file (Linux)
               if: runner.os == 'Linux'
               run: |
-                echo "YYP_VERSION=$(grep -oP '(?<=IDEVersion":")(\d+\.\d+\.\d+\.\d+)(?=")' ${{ env.YYP_PATH }})" >> $GITHUB_ENV
+                  echo "YYP_VERSION=$(grep -oP '(?<=IDEVersion":")(\d+\.\d+\.\d+\.\d+)(?=")' ${{ env.YYP_PATH }})" >> $GITHUB_ENV
             - name: Get YYP version from file (Windows)
               if: runner.os == 'Windows'
               run: |
-                $yypVersion = Select-String -Path "${{ env.YYP_PATH }}" -Pattern 'IDEVersion":"(\d+\.\d+\.\d+\.\d+)' -AllMatches | ForEach-Object { $_.Matches.Groups[1].Value }
-                "YYP_VERSION=$yypVersion" | Out-File -Append -FilePath $env:GITHUB_ENV
+                  $yypVersion = Select-String -Path "${{ env.YYP_PATH }}" -Pattern 'IDEVersion":"(\d+\.\d+\.\d+\.\d+)' -AllMatches | ForEach-Object { $_.Matches.Groups[1].Value }
+                  "YYP_VERSION=$yypVersion" | Out-File -Append -FilePath $env:GITHUB_ENV
 
             - name: Igor Setup
+              # Needed for using ImGM toolchain (for modules:copy below if using --gm)
               uses: bscotch/igor-setup@main
-              id: igor
+              timeout-minutes: 20
+              id: igor-0
               with:
                   target-yyp: ${{ env.YYP_PATH }}
                   access-key: ${{ secrets.ACCESS_KEY }}
                   local-settings-override-file: ${{ github.workspace }}/local_settings.json
                   runtime-version: ${{ inputs.runtime }}
+                  cache: true
 
             - name: Caching
               uses: actions/cache@v4
               with:
-                path: |
-                  ${{ github.workspace }}/bootstrapper
-                  ${{ github.workspace }}/runtimes
-                  ${{ steps.igor.outputs.runtime-dir }}
-                  ${{ steps.igor.outputs.user-dir }}
-                key: OS-${{ runner.os }}-_-GM-${{ inputs.runtime }}
+                  path: |
+                      ${{ env.YYP_PATH }}
+                  key: OS-${{ runner.os }}-_-GM-${{ inputs.runtime }}
 
             #endregion
 
-            #region Process Jobs
+            #region Process
             - name: Store Directory into Environment
               run: |
-                echo "IGOR_USER_DIR=${{ steps.igor.outputs.user-dir }}" >> $GITHUB_ENV
-                echo "GM_RUNTIME=${{ steps.igor.outputs.runtime-dir }}" >> $GITHUB_ENV
+                  echo "IGOR_USER_DIR=${{ steps.igor-0.outputs.user-dir }}" >> $GITHUB_ENV
+                  echo "GM_RUNTIME=${{ steps.igor-0.outputs.runtime-dir }}" >> $GITHUB_ENV
 
             - name: ImGM Run modules:copy
               run: npm run modules:copy -- --imgui --ext all
               env:
-                GM_RUNTIME: ${{ steps.igor.outputs.runtime-dir }}
+                  GM_RUNTIME: ${{ steps.igor-0.outputs.runtime-dir }}
 
             - name: Run Premake
               run: |
-                if ($env:RUNNER_OS -eq "Windows") {
-                  premake5 vs2022
-                  cmake-converter.exe -s ./src/dll/dll.sln
-                } else {
-                  premake5 gmake2
-                }
+                  if ($env:RUNNER_OS -eq "Windows") {
+                    premake5 vs2022
+                    cmake-converter.exe -s ./src/dll/dll.sln
+                  } else {
+                    premake5 gmake2
+                  }
 
             - name: Configure CMake
               run: |
@@ -113,79 +123,82 @@ jobs:
 
             - name: Build Debug
               run: |
-                cmake --build src/dll/build-debug
-                if ($env:RUNNER_OS -eq "Windows") {
-                  $files = @("ImGM.dll", "ImGM.exp", "ImGM.lib", "ImGM.pdb", "ImGM.so", "ImGM.dylib")
-                  $base = "${{ env.DLL_PATH }}"
-                  foreach ($file in $files) {
-                    $src = Join-Path $base $file
-                    $newName = "{0}.debug{1}" -f [System.IO.Path]::GetFileNameWithoutExtension($file), [System.IO.Path]::GetExtension($file)
-                    $dst = Join-Path $base $newName
-                    if (Test-Path $src) {
-                        try {
-                          Rename-Item -Path $src -NewName $newName
-                          Write-Host "Renamed $file to $newName"
-                        } catch {
-                          Write-Host "Failed to rename $src → $newName"
-                          Write-Host "Error: $_"
+                  cmake --build src/dll/build-debug
+                  if ($env:RUNNER_OS -eq "Windows") {
+                    $files = @("ImGM.dll", "ImGM.exp", "ImGM.lib", "ImGM.pdb", "ImGM.so", "ImGM.dylib")
+                    $base = "${{ env.DLL_PATH }}"
+                    foreach ($file in $files) {
+                      $src = Join-Path $base $file
+                      $newName = "{0}.debug{1}" -f [System.IO.Path]::GetFileNameWithoutExtension($file), [System.IO.Path]::GetExtension($file)
+                      $dst = Join-Path $base $newName
+                      if (Test-Path $src) {
+                          try {
+                            Rename-Item -Path $src -NewName $newName
+                            Write-Host "Renamed $file to $newName"
+                          } catch {
+                            Write-Host "Failed to rename $src → $newName"
+                            Write-Host "Error: $_"
+                          }
+                        } else {
+                          Write-Host "Skipping file not found: $src"
                         }
-                      } else {
-                        Write-Host "Skipping file not found: $src"
-                      }
-                  }
-                } else {
-                  $base = "${{ env.DLL_PATH }}"
-                  $files = @("ImGM.so", "ImGM.dylib")
-                  foreach ($file in $files) {
-                    $src = Join-Path $base $file
-                    $nameOnly = $file.Substring(0, $file.LastIndexOf('.'))
-                    $ext = $file.Split('.')[-1]
-                    $newName = "$nameOnly.debug.$ext"
-                    $dst = Join-Path $base $newName
+                    }
+                  } else {
+                    $base = "${{ env.DLL_PATH }}"
+                    $files = @("ImGM.so", "ImGM.dylib")
+                    foreach ($file in $files) {
+                      $src = Join-Path $base $file
+                      $nameOnly = $file.Substring(0, $file.LastIndexOf('.'))
+                      $ext = $file.Split('.')[-1]
+                      $newName = "$nameOnly.debug.$ext"
+                      $dst = Join-Path $base $newName
 
-                    if (Test-Path $src) {
-                        try {
-                          Rename-Item -Path $src -NewName $newName
-                          Write-Host "Renamed $file to $newName"
-                        } catch {
-                          Write-Host "Failed to rename $src → $newName"
-                          Write-Host "Error: $_"
+                      if (Test-Path $src) {
+                          try {
+                            Rename-Item -Path $src -NewName $newName
+                            Write-Host "Renamed $file to $newName"
+                          } catch {
+                            Write-Host "Failed to rename $src → $newName"
+                            Write-Host "Error: $_"
+                          }
+                        } else {
+                          Write-Host "Skipping file not found: $src"
                         }
-                      } else {
-                        Write-Host "Skipping file not found: $src"
-                      }
 
+                    }
                   }
-                }
 
             - name: Build Release
               run: cmake --build src/dll/build-release
 
-            - name: Upload Debug Artifacts
+            - name: Upload Debug DLLs
               uses: actions/upload-artifact@v4
               with:
                   name: ImGM-Debug-${{ matrix.os }}
-                  path: ${{ env.DLL_PATH }}/*.debug.*
-
-            - name: Upload Release Artifacts
+                  path: ${{ env.DLL_PATH }}/ImGM.debug.*
+                  retention-days: 1
+            - name: Upload Release DLLs
               uses: actions/upload-artifact@v4
               with:
                   name: ImGM-Release-${{ matrix.os }}
                   path: ${{ env.DLL_PATH }}/ImGM.*
+                  retention-days: 1
             #endregion
 
     test-imgm:
         needs: build-imgm
         strategy:
+            fail-fast: false
             matrix:
-                os: [windows-latest] # ubuntu-latest, macos-latest
+                os: [windows-latest] # TODO: ignored for now: ubuntu-latest, macos-latest
         runs-on: ${{ matrix.os }}
         name: Test ImGM (${{ matrix.os }}) - GM Runtime ${{ inputs.runtime }}
         environment: GameMaker
         env:
-          IGOR_USER_DIR: ${{ needs.build-imgm.outputs.igor-user-dir }}
-          IGOR_RUNTIME_DIR: ${{ needs.build-imgm.outputs.igor-runtime-dir }}
+            IGOR_USER_DIR: ${{ needs.build-imgm.outputs.igor-user-dir }}
+            GM_RUNTIME: ${{ needs.build-imgm.outputs.igor-runtime-dir }}
         steps:
+            #region Init
             - name: Checkout
               uses: actions/checkout@v4
 
@@ -208,16 +221,124 @@ jobs:
                   $debugDir = Join-Path $base "debug"
                   $releaseDir = Join-Path $base "release"
                   $files = @("ImGM.dll", "ImGM.exp", "ImGM.lib", "ImGM.pdb", "ImGM.so", "ImGM.dylib")
-                  foreach ($f in $files) {
-                    $debug = Join-Path $debugDir $f
-                    $release = Join-Path $releaseDir $f
-                    $target = Join-Path $base $f
-                    if (Test-Path $debug) { Copy-Item $debug -Destination $target -Force }
-                    elseif (Test-Path $release) { Copy-Item $release -Destination $target -Force }
+                  foreach ($file in $files) {
+                    $debug = Join-Path $debugDir $file
+                    $release = Join-Path $releaseDir $file
+                    $target = Join-Path $base $file
+                    if (Test-Path $release) {
+                      Write-Host "Moving $file (Release) to $base"
+                      Copy-Item $release -Destination $target -Force
+                    }
+                    elseif (Test-Path $debug) {
+                      Write-Host "Moving $file (Debug) to $base"
+                      Copy-Item $debug -Destination $target -Force
+                    } else {
+                      Write-Host "Skipping file not found: $file"
+                    }
                   }
-
-            - name: Igor Build GameMaker Project
+            #endregion
+            #region Build
+            - name: Igor Setup
+              uses: bscotch/igor-setup@main
+              timeout-minutes: 20
+              id: igor
+              with:
+                  target-yyp: ${{ env.YYP_PATH }}
+                  access-key: ${{ secrets.ACCESS_KEY }}
+                  local-settings-override-file: ${{ github.workspace }}/local_settings.json
+                  runtime-version: ${{ inputs.runtime }}
+                  cache: true
+            - name: Igor Build
               uses: bscotch/igor-build@main
+              timeout-minutes: 20
+              id: igor-build
               with:
                   yyp-path: ${{ env.YYP_PATH }}
                   user-dir: ${{ env.IGOR_USER_DIR }}
+                  config: Test
+
+            - name: Upload Output Application
+              uses: actions/upload-artifact@v4
+              with:
+                  name: igor-build-${{ matrix.os }}
+                  path: ${{ steps.igor-build.outputs.out-dir }}
+                  retention-days: 1
+            #endregion
+            #region Perform tests
+            - name: Test Application
+              if: runner.os == 'Windows'
+              timeout-minutes: 20
+              shell: pwsh
+              working-directory: ${{ steps.igor-build.outputs.out-dir }}
+              run: |
+                  $baseName = "${{ env.PROJECT_NAME }}"
+                  Expand-Archive -Path ${{ steps.igor-build.outputs.out-dir }}/$baseName.zip -Destination ${{ steps.igor-build.outputs.out-dir }}
+                  $saveDataDir = Join-Path $env:LOCALAPPDATA $baseName
+
+                  $executableName = "${{ env.PROJECT_NAME }}"
+                  $exePath = Resolve-Path "$executableName.exe"
+                  if (-not (Test-Path $exePath)) {
+                      throw "$exePath does not exist"
+                  }
+
+                  $logFile = "run.log"
+                  if ((Test-Path $logFile)) {
+                    Remove-Item $logFile -Force
+                  }
+                  New-Item -Path $logFile -ItemType File -Force
+                  $logFile = Resolve-Path $logFile
+
+                  $ktfLog = "ktf-stats.log"
+                  if (Test-Path $ktfLog) {
+                      Remove-Item $ktfLog -Force
+                  }
+
+                  Write-Host "Running $exePath"
+                  $process = Start-Process -FilePath $exePath -ArgumentList "-output","$logFile","-debugoutput","$logFile" -PassThru -NoNewWindow
+
+                  if ((Test-Path $saveDataDir)) {
+                    Remove-Item $saveDataDir -Recurse -Force
+                  }
+
+                  Write-Host "Testing..."
+                  $maxWaitSeconds = 600
+                  $startTime = Get-Date
+                  $done = $false
+
+                  while (-not $done -and ((Get-Date) - $startTime).TotalSeconds -lt $maxWaitSeconds) {
+                      Start-Sleep -Seconds 1
+                      if (Test-Path $ktfLog) {
+                          try {
+                              $json = Get-Content $ktfLog -Raw | ConvertFrom-Json
+                              if ($json.status -eq "done") {
+                                  $done = $true
+                                  Write-Host "✅ Test run complete"
+                                  Write-Host "✔ Passed: $($json.success)"
+                                  Write-Host "❌ Failed: $($json.failed)"
+                                  Write-Host "📊 Total: $($json.count)"
+                              } else {
+                                  Write-Host "⏳ Status: $($json.status)"
+                                  foreach ($testName in $json.tests.Keys) {
+                                      $test = $json.tests[$testName]
+                                      $status = $test._status
+                                      $assertions = $test.assertions
+                                      Write-Host "• $testName → $status ($assertions assertions)"
+                                  }
+                              }
+                          } catch {
+                              Write-Host "⚠️ Failed to parse ktf-stats.log: $_"
+                          }
+                      } else {
+                          Write-Host "⏳ Waiting for ktf-stats.log..."
+                      }
+                  }
+
+                  Wait-Process -InputObject $process
+                  if ($process.ExitCode -ne 0 -or -not $done) {
+                      Write-Host "❌ Test application failed or timed out"
+                      exit 1
+                  }
+
+                  Write-Host "✅ All tests passed"
+                  exit 0
+              #endregion

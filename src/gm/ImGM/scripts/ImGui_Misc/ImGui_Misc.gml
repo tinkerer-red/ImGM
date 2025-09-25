@@ -1,5 +1,21 @@
+#region ImGM Macros
+
+#macro IMGM_VERSION (extension_get_version("ImGM"))
+
+#endregion
+
+#region ImGM Functions
+
+#endregion
+
+#region ImGM Classes
+
+#endregion
+
 /**
  * @function ImGuiExtMethodCall
+ * @description . TODO: Documentation
+ * @context ImGM
  * @param [method_name]
  * @param [ext_name]
  * @param [_args]
@@ -38,6 +54,7 @@ function ImGuiExtMethodCall(method_name=undefined, ext_name=undefined, _args=und
  * @function ImGuiBaseMainWindow
  * @constructor
  * @description A GM-side base main viewport for use with ImGui.
+ * @context ImGM
  *
  */
 function ImGuiBaseMainWindow() constructor {
@@ -65,6 +82,7 @@ function ImGuiBaseMainWindow() constructor {
  * @function ImGuiState
  * @constructor
  * @description A GM-side context and variables holder for use with ImGui
+ * @context ImGM
  *
  */
 function ImGuiState() constructor {
@@ -256,7 +274,8 @@ function ImColor(red, green=undefined, blue=undefined, alpha=1) constructor {
 /**
  * @function ImGuiWindowClass
  * @constructor
- * Represents a window class. This is managed in your game and is sent to ImGui backend on setting the window class calls.
+ * @description Represents a window class. This is managed in your game and is sent to ImGui backend on setting the window class calls.
+ * @context ImGM
  *
  */
 function ImGuiWindowClass(class_id, parent_viewport_id=undefined, viewport_flags_override_set=ImGuiViewportFlags.None, viewport_flags_override_clear=ImGuiViewportFlags.None) constructor {
@@ -283,7 +302,8 @@ function ImGuiWindowClass(class_id, parent_viewport_id=undefined, viewport_flags
 /**
  * @function ImGuiSelectionBasicStorage
  * @constructor
- * Creates an ImGuiSelectionBasicStorage in the extension. Use Destroy() when done.
+ * @description Creates an ImGuiSelectionBasicStorage in the extension. Use Destroy() when done.
+ * @context ImGM
  *
  */
 function ImGuiSelectionBasicStorage(size=0, preserve_order=undefined) constructor {
@@ -317,7 +337,6 @@ function ImGuiSelectionBasicStorage(size=0, preserve_order=undefined) constructo
         __imgui_destroy_multi_select_basic_storage(self);
     }
 }
-
 
 #macro IMGUI_PAYLOAD_TYPE_COLOR_3F     "_COL3F"    // (GML) int32: Standard type for colors, without alpha. User code may use this type.
 #macro IMGUI_PAYLOAD_TYPE_COLOR_4F     "_COL4F"    // (GML) struct: Standard type for colors. User code may use this type.

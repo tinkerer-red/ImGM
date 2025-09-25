@@ -10,7 +10,7 @@ GMFUNC(__imgui_color_edit3) {
 	GMDEFAULT(ImGuiColorEditFlags.None);
 	GMOVERRIDE(ColorEdit3);
 
-	ImVec4 color = GMCOLOR_TO(col, 1.0f);
+	ImVec4 color = GMCOLOR_TO((int)col, 1.0f);
 	Result.kind = VALUE_REAL;
 	Result.val = (ImGui::ColorEdit3(label, &color.x, flags) ? GMCOLOR_FROM(color) : col);
 }
@@ -22,7 +22,7 @@ GMFUNC(__imgui_color_picker3) {
 	GMDEFAULT(ImGuiColorEditFlags.None);
 	GMOVERRIDE(ColorPicker3);
 
-	ImVec4 color = GMCOLOR_TO(col, 1.0f);
+	ImVec4 color = GMCOLOR_TO((int)col, 1.0f);
 	Result.kind = VALUE_REAL;
 	Result.val = (ImGui::ColorPicker3(label, &color.x, flags) ? GMCOLOR_FROM(color) : col);
 }
