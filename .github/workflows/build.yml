@@ -311,7 +311,7 @@ jobs:
                       if (Test-Path $ktfLog) {
                           try {
                               $json = Get-Content $ktfLog -Raw | ConvertFrom-Json
-                              if ($json.status -eq "done") {
+                              if ($json.status -eq "success") {
                                   $done = $true
                                   Write-Host "✅ Test run complete"
                                   Write-Host "✔ Passed: $($json.success)"
@@ -342,4 +342,4 @@ jobs:
 
                   Write-Host "✅ All tests passed"
                   exit 0
-              #endregion
+            #endregion
