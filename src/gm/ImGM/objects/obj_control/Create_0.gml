@@ -22,8 +22,8 @@ var _imgui_config_flags = ImGuiConfigFlags.DockingEnable | ImGuiConfigFlags.View
 
 ImGui.__Initialize(_imgui_config_flags);
 
-imgui_state = ImGui.__State; // Capture the created state.
-imgui_window = ImGui.__Window; // Capture the created gamewindow.
+imgui_state = ImGui.__state; // Capture the created state.
+imgui_window = ImGui.__window; // Capture the created gamewindow.
 
 /// Optional: Ini settings
 ini_filename = "";
@@ -58,12 +58,22 @@ global.accent_color = #00A1ff;
 
 /// ImGui specific
 global.font_default = ImGui.AddFontDefault();
-global.font_roboto = ImGui.AddFontFromFileTTF("fonts/Roboto-Regular.ttf", 24);
+global.font_roboto = ImGui.AddFontFromFileTTF("fonts/andlso.ttf", 24, undefined, 
+	[
+		0x0020, 0x00FF, // Latin
+		0x600, 0x6FF, // Arabic U+0600-U+06FF (1536-1791)
+	    1872, 1919,   // Arabic Supplement (U+0750–U+077F)
+	    2208, 2303,   // Arabic Extended-A (U+08A0–U+08FF)
+	    64336, 65023, // Presentation Forms-A (U+FB50–U+FDFF)
+	    65136, 65279, // Presentation Forms-B (U+FE70–U+FEFF)
+		0			  // GML-optional, zero terminator for array.
+	]
+);
 global.enable_docking = false;
 
-/// Window classes
-global.window_class_basic = new ImGuiWindowClass(1, -1);
-global.window_class_no_automerge = new ImGuiWindowClass(2, -1, ImGuiViewportFlags.NoAutoMerge);
+/// Example: Creating ImGui window classes
+// global.window_class_basic = new ImGuiWindowClass(1, -1);
+// global.window_class_no_automerge = new ImGuiWindowClass(2, -1, ImGuiViewportFlags.NoAutoMerge);
 
 /// Rooms
 var _all_room_ids = asset_get_ids(asset_room); // array of refs

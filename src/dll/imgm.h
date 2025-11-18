@@ -32,8 +32,8 @@
 #define GMFUNC(name) GMEXPORT void name(RValue& Result, CInstance* selfinst, CInstance* otherinst, int argc, RValue* arg)
 
 // Interface
-#define ShowError(...) YYError("[ImGui_GM] An error has occured:\n- %s\n", __VA_ARGS__)
-#define WriteLog(...) DebugConsoleOutput("[ImGui_GM] %s\n", __VA_ARGS__)
+#define ShowError(...) YYError("[ImGM] An error has occured:\n- %s\n", __VA_ARGS__)
+#define WriteLog(...) DebugConsoleOutput("[ImGM] %s\n", __VA_ARGS__)
 
 // Helpers
 static inline ImVec4 GMCOLOR_TO(int col, float alpha) {
@@ -85,14 +85,23 @@ static ImGuiDockNodeFlags RConvertToImGuiDockNodeFlags(RValue* rvalue) {
 static ImGuiConfigFlags RConvertToImGuiConfigFlags(RValue* rvalue) {
     return static_cast<ImGuiConfigFlags>(rvalue->asInt64());
 }
-static bool RConvertToBool(RValue* rvalue) {
-	return rvalue->asBool();
-}
-static int RConvertToReal(RValue* rvalue) {
-	return static_cast<int>(rvalue->asReal());
+static float RConvertToReal(RValue* rvalue) {
+	return rvalue->asReal();
 }
 static int64_t RConvertToInt64(RValue* rvalue) {
 	return rvalue->asInt64();
+}
+static bool RConvertToBool(RValue* rvalue) {
+	return rvalue->asBool();
+}
+static const char* RConvertToString(RValue* rvalue) {
+	return rvalue->GetString();
+}
+static int RConvertToInt(RValue* rvalue) {
+	return static_cast<int>(rvalue->asReal());
+}
+static unsigned int RConvertToUInt(RValue* rvalue) {
+	return static_cast<unsigned int>(rvalue->asReal());
 }
 
 // Classes

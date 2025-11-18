@@ -115,7 +115,7 @@ const jsdocConfig = {
 	/**
 	 * What tag to use for description
 	 */
-	descriptionTag: "@description",
+	descriptionTag: "@desc",
 	/**
 	 * What tag to use for function
 	 */
@@ -137,7 +137,7 @@ const jsdocConfig = {
 	 * 'single'     /// ...
 	 * 'multi'      /**\n * ...\n...  \n *\/
 	 */
-	docletCommentType: "multi", // Unused
+	docletCommentType: "multi",
 	/**
 	 * Whether to write the arguments in the function tag line
 	 */

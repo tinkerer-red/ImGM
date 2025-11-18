@@ -69,14 +69,14 @@ if (main_open) {
                 ImGui.TextColored(string_char_at(_str, i + 1), _c);
                 if (i < _i - 1) ImGui.SameLine(0,2);
             }
-            ImGui.TextColored("Improved by knno", #3bb1f8);
+            ImGui.TextColored("by knno", #3bb1f8);
             ImGui.Separator();
             ImGui.TextColored("Source URL: ", #3bb1f8);
             ImGui.SameLine(0,0);
             ImGui.TextLinkOpenURL("knno/ImGM", "https://github.com/knno/ImGM");
             ImGui.Separator();
             if (!is_undefined(_static)) {
-                _static.__State.Display.Scale = max(0.5, ImGui.InputDouble("Scale", _static.__State.Display.Scale, 0.1, 0.25));
+                _static.__state.Display.Scale = max(0.5, ImGui.InputDouble("Scale", _static.__state.Display.Scale, 0.1, 0.25));
             } else {
                 ImGui.BeginDisabled();
                 ImGui.InputDouble("ImGui.__Scale", 1);
@@ -182,6 +182,19 @@ if (main_open) {
                 }
             }
         ImGui.EndChild();
+
+		ImGui.BeginChild("Inner_Sliders", width / 2, height, ImGuiChildFlags.Borders);
+			ImGui.Text("Sliders");
+			ImGui.Separator();
+
+			slider_int = ImGui.SliderInt("ImGui::SliderInt", slider_int, 0, 10);
+			ImGui.SliderInt2("ImGui::SliderInt2", slider_int2, 0, 10);
+			ImGui.SliderInt3("ImGui::SliderInt3", slider_int3, 0, 10);
+			ImGui.SliderInt4("ImGui::SliderInt4", slider_int4, 0, 10);
+			ImGui.SliderIntN("ImGui::SliderIntN", slider_intn, 0, 10);
+
+			slider_float = ImGui.SliderFloat("ImGui::SliderFloat", slider_float, 0.0, 1.0);
+		ImGui.EndChild();
 
         ImGui.BeginChild("Inner_Inputs", width / 2, height, ImGuiChildFlags.Borders);
             ImGui.Text("Inputs");
@@ -346,8 +359,11 @@ if (main_open) {
         ImGui.BeginChild("Inner_Fonts", width / 2, height, ImGuiChildFlags.Borders);
             ImGui.Text("Fonts");
             ImGui.Separator();
+            ImGui.Text("Hello! " + chr(0x0647) + chr(0x0627)+ chr(0x064A) + "/هاي! привет!");
+            ImGui.Separator();
             ImGui.Text("You can load TTF/OTF font files from disk!");
             ImGui.PushFont(global.font_roboto);
+            ImGui.Text("Hello! " + chr(0x0647) + chr(0x0627)+ chr(0x064A) + "/هاي! привет!");
             ImGui.TextColored("And use them wherever!", c_aqua);
             ImGui.Text("Pretty neat, right?!");
             ImGui.PopFont();
